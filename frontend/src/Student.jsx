@@ -576,6 +576,7 @@ export default function Student() {
     run(async () => {
       await api('/auth/logout', { method: 'POST' })
       setPerson(null)
+      setWorkspaceSection('overview')
       setStep('send')
       setRoll('')
       setEmail('')
@@ -621,8 +622,10 @@ export default function Student() {
 
   const current = applications[0]
   const completed = current?.handoverStatus === 'HANDED_OVER'
-  const showAlumni = !alumniDone
-  const showNoDues = alumniDone && !current
+  // The backend is authoritative; these flags only control what students see.
+  const alumniEligible = person?.alumniEligible === true
+  const showAlumni = alumniEligible && !alumniDone
+  const showNoDues = alumniEligible && alumniDone && !current
   const certificateSection = workspaceSection === 'apply' || workspaceSection === 'requests'
 
   if (checkingSession) return (
@@ -648,7 +651,7 @@ export default function Student() {
 
   const studentMenu = [
     ['overview', 'Overview', GraduationCap],
-    ['clearance', 'Alumni & No Dues', ClipboardCheck],
+    ...(alumniEligible ? [['clearance', 'Alumni & No Dues', ClipboardCheck]] : []),
     ['apply', 'Apply for Certificate', FileText],
     ['requests', 'My Certificate Requests', FileCheck2],
     ['profile', 'My Profile', ShieldCheck],
@@ -675,18 +678,24 @@ export default function Student() {
         <ErrorPanel error={error}/>
         <Notice>{info}</Notice>
         {workspaceSection==='overview' && <div className="sd-overview-links">
-          <section className="card p-4">
+          {alumniEligible ? <section className="card p-4">
             <h2>Alumni & No Dues</h2>
             <p>{current ? `Current status: ${String(current.status||'Pending').replaceAll('_',' ')}` : alumniDone ? 'Alumni registration complete. No Dues can be submitted.' : 'Alumni registration is not submitted.'}</p>
             <button className="btn btn-primary" type="button" onClick={()=>setWorkspaceSection('clearance')}>Open No Dues</button>
-          </section>
+          </section> : <section className="card p-4" aria-label="Alumni eligibility">
+            <h2>Alumni & No Dues</h2>
+            <p role="status">{person.alumniAccessMessage || 'Alumni Registration is for graduated students only.'}</p>
+          </section>}
           <section className="card p-4">
             <h2>Certificate Requests</h2>
             <p>Apply for Study, Bonafide, LOR, Duplicate TC or Conduct Certificate.</p>
             <button className="btn btn-primary" type="button" onClick={()=>setWorkspaceSection('apply')}>Apply for Certificate</button>
           </section>
         </div>}
-        {workspaceSection==='clearance' && <section aria-label="Alumni & No Dues">
+        {workspaceSection==='clearance' && !alumniEligible && <section className="card p-4" role="status">
+          {person.alumniAccessMessage || 'Alumni Registration is for graduated students only.'}
+        </section>}
+        {workspaceSection==='clearance' && alumniEligible && <section aria-label="Alumni & No Dues">
           <div className="sd-step-row" aria-label="No Dues clearance stages">
             <StepCard number="01" title="Alumni Registration" subtitle="One-time registration" state={alumniDone?'done':'active'} active={showAlumni}/>
             <StepCard number="02" title="No Dues" subtitle="17 department approvals" state={current?'done':alumniDone?'active':'upcoming'} active={showNoDues}/>

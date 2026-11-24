@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class WorkflowService {
     final StudentDirectoryService directory;
+    final GraduationEligibility graduation;
     final StudentRepository students;
     final DepartmentDecisionEventRepository decisions;
     final AlumniRepository alumni;
@@ -32,8 +33,9 @@ public class WorkflowService {
     final HandoverRepository handovers;
     final OriginalDocumentRepository originalDocuments;
 
-    public WorkflowService(StudentDirectoryService directory, DepartmentDecisionEventRepository decisions, StudentRepository students, AlumniRepository alumni, FriendRepository friends, ApplicationRepository apps, DepartmentRepository departments, ApprovalRepository approvals, PrincipalDecisionRepository principals, StaffRepository staff, AuditEventRepository audit, ReopeningRepository reopenings, GeneratedFormRepository forms, EmailDeliveryRepository emails, HandoverRepository handovers, OriginalDocumentRepository originalDocuments) {
+    public WorkflowService(StudentDirectoryService directory, GraduationEligibility graduation, DepartmentDecisionEventRepository decisions, StudentRepository students, AlumniRepository alumni, FriendRepository friends, ApplicationRepository apps, DepartmentRepository departments, ApprovalRepository approvals, PrincipalDecisionRepository principals, StaffRepository staff, AuditEventRepository audit, ReopeningRepository reopenings, GeneratedFormRepository forms, EmailDeliveryRepository emails, HandoverRepository handovers, OriginalDocumentRepository originalDocuments) {
         this.directory = directory;
+        this.graduation = graduation;
         this.decisions = decisions;
         this.students = students;
         this.alumni = alumni;
@@ -93,10 +95,11 @@ public class WorkflowService {
 
     @Transactional
     public Alumni registerAlumni(long studentId, Records.AlumniInput in) {
+        Student s = students.findById(studentId).orElseThrow(() -> bad("Identity not found"));
+        graduation.requireGraduated(s.rollNumber);
         if (alumni.findByStudentId(studentId).isPresent()) throw conflict("Alumni Registration already submitted");
         if (in == null || in.friends() == null || in.friends().size() != 5)
             throw bad("Five friends with names and phone numbers are required");
-        Student s = students.findById(studentId).orElseThrow(() -> bad("Identity not found"));
         Alumni a = new Alumni();
         a.studentId = studentId;
         a.name = mandatory(in.name(), "Name");
@@ -132,6 +135,9 @@ public class WorkflowService {
 
     @Transactional
     public Application submitNoDues(long studentId, Records.NoDuesInput in) {
+        // No Dues still follows Alumni Registration and therefore the same graduation rule.
+        Student s = students.findById(studentId).orElseThrow(() -> bad("Identity not found"));
+        graduation.requireGraduated(s.rollNumber);
         Alumni a = alumni.findByStudentId(studentId).orElseThrow(() -> bad("Submit Alumni Registration first"));
         // One-time No Dues: lock student row to prevent simultaneous duplicate submissions.
         students.lockById(studentId).orElseThrow(() -> bad("Student not found"));
@@ -176,23 +182,23 @@ public class WorkflowService {
         PrincipalDecision principal = principals.findByApplicationId(v.id).orElse(null);
         GeneratedForm form = forms.findByApplicationId(v.id).orElse(null);
         List<EmailDelivery> mail = emails.findByApplicationIdOrderByCreatedAtDesc(v.id);
-        List<OriginalDocument> originalList = originalDocuments.findByApplicationIdOrderById(v.id);
-        List<OriginalDocument> activeOriginals = originalList.stream().filter(d -> Boolean.TRUE.equals(d.active)).toList();
-        String collectionStatus = handovers.findByApplicationId(v.id).map(h -> h.handedOverAt == null ? "VERIFICATION_PENDING" : "HANDED_OVER").orElse("NOT_COLLECTED");
+        List<OriginalDocument> originalList=originalDocuments.findByApplicationIdOrderById(v.id);
+        List<OriginalDocument> activeOriginals=originalList.stream().filter(d->Boolean.TRUE.equals(d.active)).toList();
+        String collectionStatus=handovers.findByApplicationId(v.id).map(h -> h.handedOverAt == null ? "VERIFICATION_PENDING" : "HANDED_OVER").orElse("NOT_COLLECTED");
         if (!originalList.isEmpty()) {
-            long done = activeOriginals.stream().mapToLong(d -> d.collectedQuantity).sum();
-            long expected = activeOriginals.stream().mapToLong(d -> d.expectedQuantity).sum();
-            collectionStatus = expected > 0 && done >= expected ? "HANDED_OVER" : done > 0 ? "PARTIALLY_COLLECTED" : "NOT_COLLECTED";
+            long done=activeOriginals.stream().mapToLong(d->d.collectedQuantity).sum();
+            long expected=activeOriginals.stream().mapToLong(d->d.expectedQuantity).sum();
+            collectionStatus=expected>0&&done>=expected?"HANDED_OVER":done>0?"PARTIALLY_COLLECTED":"NOT_COLLECTED";
         }
         return new Records.ApplicationView(v.id, s.rollNumber, v.studentName, v.branch, v.address, v.phone, v.email, v.status, v.submittedAt, p, principal == null ? "PENDING" : principal.status, principal == null || principal.staffId == null ? null : staff.findById(principal.staffId).map(x -> x.name).orElse(null), principal == null ? null : principal.remarks, principal == null ? null : principal.decidedAt, form != null && !Boolean.TRUE.equals(form.revoked), form == null ? null : form.verificationId, mail.isEmpty() ? "NOT_GENERATED" : mail.getFirst().state, collectionStatus);
     }
 
-    public Records.ApplicationView studentView(Application app) {
-        Records.ApplicationView v = view(app);
-        List<Records.ApprovalView> safe = v.approvals().stream()
-                .map(a -> new Records.ApprovalView(a.id(), a.departmentId(), a.department(), a.code(), a.status(), null, a.remarks(), a.decidedAt())).toList();
-        return new Records.ApplicationView(v.id(), v.rollNumber(), v.studentName(), v.branch(), v.address(), v.phone(), v.email(), v.status(), v.submittedAt(), safe,
-                v.principalStatus(), null, v.principalRemarks(), v.principalDate(), v.pdfReady(), v.verificationId(), v.emailStatus(), v.handoverStatus());
+    public Records.ApplicationView studentView(Application app){
+        Records.ApplicationView v=view(app);
+        List<Records.ApprovalView> safe=v.approvals().stream()
+            .map(a->new Records.ApprovalView(a.id(),a.departmentId(),a.department(),a.code(),a.status(),null,a.remarks(),a.decidedAt())).toList();
+        return new Records.ApplicationView(v.id(),v.rollNumber(),v.studentName(),v.branch(),v.address(),v.phone(),v.email(),v.status(),v.submittedAt(),safe,
+              v.principalStatus(),null,v.principalRemarks(),v.principalDate(),v.pdfReady(),v.verificationId(),v.emailStatus(),v.handoverStatus());
     }
 
     @Transactional
@@ -215,13 +221,8 @@ public class WorkflowService {
         a.decidedAt = LocalDateTime.now(java.time.ZoneId.of("Asia/Kolkata"));
         approvals.saveAndFlush(a);
         DepartmentDecisionEvent d = new DepartmentDecisionEvent();
-        d.applicationId = v.id;
-        d.departmentId = a.departmentId;
-        d.accountId = actor.id;
-        d.action = a.status;
-        d.remarks = a.remarks;
-        d.decidedAt = a.decidedAt;
-        d.cycleStartedAt = cycleStart;
+        d.applicationId = v.id; d.departmentId = a.departmentId; d.accountId = actor.id;
+        d.action = a.status; d.remarks = a.remarks; d.decidedAt = a.decidedAt; d.cycleStartedAt = cycleStart;
         decisions.save(d);
         List<Approval> current = approvals.findByApplicationIdOrderByDepartmentId(v.id);
         if (current.stream().anyMatch(z -> "REJECTED".equals(z.status))) v.status = "ACTION_REQUIRED";

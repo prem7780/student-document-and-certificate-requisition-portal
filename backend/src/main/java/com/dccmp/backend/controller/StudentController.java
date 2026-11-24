@@ -19,6 +19,7 @@ import java.util.stream.*;
 @RequestMapping("/api")
 public class StudentController {
     private final StudentDirectoryService directory;
+    private final GraduationEligibility graduation;
     private final Access access;
     private final StudentRepository students;
     private final AlumniRepository alumni;
@@ -27,8 +28,9 @@ public class StudentController {
     private final ApplicationRepository apps;
     private final DocumentService documents;
 
-    public StudentController(Access access, StudentRepository students, AlumniRepository alumni, FriendRepository friends, WorkflowService flow, ApplicationRepository apps, DocumentService documents, StudentDirectoryService directory) {
+    public StudentController(Access access, StudentRepository students, AlumniRepository alumni, FriendRepository friends, WorkflowService flow, ApplicationRepository apps, DocumentService documents, StudentDirectoryService directory, GraduationEligibility graduation) {
         this.directory = directory;
+        this.graduation = graduation;
         this.access = access;
         this.students = students;
         this.alumni = alumni;
@@ -45,12 +47,13 @@ public class StudentController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("rollNumber", s.rollNumber);
         m.put("email", s.email);
-        directory.find(s.rollNumber).ifPresentOrElse(d -> {
-            m.put("studentName", d.studentName);
-            m.put("officialBranch", d.branch);
-            m.put("directoryMatched", true);
-        }, () -> m.put("directoryMatched", false));
+        directory.find(s.rollNumber).ifPresentOrElse(d -> {m.put("studentName", d.studentName);m.put("officialBranch",d.branch);m.put("directoryMatched",true);},()->m.put("directoryMatched",false));
         m.put("alumniSubmitted", alumni.findByStudentId(id).isPresent());
+        GraduationEligibility.Status eligibility = graduation.status(s.rollNumber);
+        m.put("alumniEligible", eligibility.eligible());
+        m.put("graduationYear", eligibility.graduationYear());
+        m.put("alumniEligibleFrom", eligibility.availableFrom());
+        m.put("alumniAccessMessage", eligibility.message());
         return m;
     }
 
