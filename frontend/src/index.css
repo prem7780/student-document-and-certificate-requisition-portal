@@ -418,3 +418,417 @@ a:not([class]):hover { color: #2b4861; }
 .status-COLLECTED { color: #2f6f58; background: #ecf5ef; border: 1px solid #dbece1; }
 .status-CANCELLED, .status-EXPIRED { color: #666e7b; background: #f2f3f5; border: 1px solid #e3e6ea; }
 @media(max-width:640px) { .campus-service-dialog-inner { padding: 17px; } .campus-service-section .table-wrap { margin: 0 -4px; } }
+/* ==============================================================
+ * Student Document Requisition and Certificate Portal
+ * Design C: Professional Administration, 2026
+ * Presentation overrides only: NO endpoint or permission changes.
+ * ============================================================== */
+:root{
+  --canvas:#fff;--surface:#fff;--surface-soft:#f5f7fa;--surface-hover:#f1f5f9;
+  --ink:#203249;--ink-strong:#1b3049;--muted:#637489;
+  --line:#d7dfe8;--line-strong:#cbd6e2;
+  --accent:#205a94;--accent-strong:#205a94;--accent-soft:#e8f0f9;
+  --shadow:none;
+  font-family:Arial,"Segoe UI",sans-serif;
+}
+html{scroll-behavior:auto}
+body,#root,.campus-public-page,.staff-shell{background:#fff!important;color:var(--ink)}
+#root .card,#root .panel{border:1px solid #d8e1e9;border-radius:3px!important;box-shadow:none!important;background:#fff}
+#root .rounded-xl,#root .rounded-2xl{border-radius:4px!important}
+#root .shadow-xl{box-shadow:0 8px 26px rgba(15,36,58,.14)!important}
+#root .section-title{font-size:20px;line-height:1.3;letter-spacing:-.015em;color:#1b3049}
+#root .campus-service-heading{font-size:17px;font-weight:700;color:#203a56}
+#root .campus-service-subheading{font-size:14px;font-weight:700;color:#243d56}
+#root .campus-eyebrow{display:none}
+#root .tiny{font-size:11px;line-height:1.4;color:#64748b}
+#root .label{font-size:11px;font-weight:700;margin-bottom:5px;color:#344b63}
+#root .field{min-height:35px;padding:8px 10px;font-size:12px;border-radius:3px!important;border-color:#cbd6e2;box-shadow:none;background:#fff}
+#root .field:focus{border-color:#205a94;box-shadow:0 0 0 2px rgba(32,90,148,.12)}
+#root .field[aria-invalid="true"],#root .field:invalid:focus{border-color:#b84545!important;box-shadow:0 0 0 1px #b84545}
+#root textarea.field{min-height:65px}
+#root .btn{min-height:34px;padding:7px 11px;border-radius:3px!important;gap:6px;font-size:11px;line-height:1.3}
+#root .btn-primary,#root .btn-dark{background:#205a94!important;border-color:#205a94!important;color:white!important}
+#root .btn-primary:hover:not(:disabled),#root .btn-dark:hover:not(:disabled){background:#174a7e!important;border-color:#174a7e!important}
+#root .btn-muted{background:#fff!important;color:#244b72!important;border:1px solid #c8d4e1!important}
+#root .btn-muted:hover:not(:disabled){background:#eff4f8!important}
+#root .btn-danger{background:#fff8f8;color:#9a3232;border:1px solid #dfb7b7}
+#root .btn-danger:hover:not(:disabled){background:#fbe9e9}
+#root .metric{font-size:23px!important;line-height:1.2;color:#1d4c7a}
+#root .card [class*="text-[28px]"]{font-size:23px}
+#root table{font-size:11px}
+#root th{background:#f3f6f9!important;color:#41546b;font-size:10px;text-transform:none;letter-spacing:0;font-weight:700}
+#root th,#root td{padding:9px 10px;border-color:#e1e7ee;vertical-align:middle}
+#root td{font-size:11px;line-height:1.4}
+#root tbody tr:hover{background:#f6f9fc!important}
+#root .pill{padding:3px 6px;border-radius:2px;font-size:10px}
+#root .input-grid{gap:11px;grid-template-columns:repeat(auto-fit,minmax(185px,1fr))}
+#root .campus-service-section{margin-bottom:14px}
+#root .campus-service-tabs{gap:15px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:13px;padding-bottom:0;border-bottom:1px solid #d8e1e9}
+#root .campus-service-tabs .btn{background:transparent!important;border:0!important;border-radius:0!important;border-bottom:2px solid transparent!important;white-space:nowrap;min-height:37px;color:#576c80!important;padding:8px 2px}
+#root .campus-service-tabs .btn.is-active{background:transparent!important;color:#205a94!important;border-bottom-color:#205a94!important;font-weight:700}
+#root .campus-service-metric{background:#fff;border:1px solid #d8e1e9;border-radius:3px;padding:10px}
+#root .campus-service-metric strong{font-size:20px;margin-top:5px;color:#205a94}
+#root .campus-service-note{border-radius:3px;background:#f3f7fb;color:#284460;padding:10px}
+#root .campus-service-row{padding:9px 0}
+#root .campus-service-actions{gap:5px}
+#root .campus-service-actions .btn{padding:5px 8px;min-height:30px}
+#root .campus-service-dialog-inner{border-radius:3px;max-width:570px;padding:19px}
+#root [role="alert"].sd-error-box,#root .sd-error-box{border:1px solid #dcabab;background:#fff0f0;color:#8f2424;font-size:12px;line-height:1.5;padding:10px 12px;margin-bottom:13px;border-radius:3px}
+#root .sd-field-error{display:block;color:#a12727;font-size:11px;font-weight:600;margin-top:5px}
+#root .sd-form-hint{font-size:11px;color:#607287;margin:5px 0 0}
+#root .sd-text-button{font-size:12px;text-align:left;color:#1f5b92;text-decoration:underline}
+#root .sd-inline-meta{margin-top:18px;font-size:11px;color:#617287;border-top:1px solid #dfe6ed;padding-top:14px}
+#root .sd-inline-meta a{color:#205a94;font-weight:700}
+
+/* Shared white product header: stable on every role. */
+#root .campus-topbar{background:white!important;border-bottom:1px solid #d8e0e8!important}
+#root .campus-topbar-inner{min-height:52px;max-width:none;padding-inline:17px;gap:12px}
+#root .campus-brand{gap:8px}
+#root .campus-brand-mark{width:29px;height:29px;background:#e8f0f9!important;color:#174a7e!important;border-color:#c8d8e8;border-radius:3px;font-size:10px}
+#root .campus-brand-name{color:#183f6a!important;font-size:13px;font-weight:700;line-height:1.3}
+#root .campus-brand-subtitle{display:none}
+#root .campus-top-link{min-height:31px;font-size:11px;padding:6px 9px;border-radius:3px}
+#root .campus-top-active{background:#e8f0f9!important;color:#205a94!important}
+#root .campus-topbar [title="Sign out"]{min-height:31px!important}
+#root .campus-public-page>footer{display:none}
+
+/* Public page and sign-in: remove marketing presentation in favor of compact form. */
+#root .sd-signin-screen{min-height:calc(100vh - 52px);display:grid;place-items:start center;padding:48px 16px;background:#f7f9fc}
+#root .sd-signin-card{width:100%;max-width:420px;padding:23px}
+#root .sd-signin-card h1{margin-bottom:17px}
+#root .sd-hero-title{font-size:clamp(25px,3vw,36px);max-width:740px}
+#root .campus-hero>div{gap:20px;padding-top:35px;padding-bottom:35px}
+#root .campus-hero .campus-workflow{padding:15px}
+#root .campus-hero [class*="mt-7"]{margin-top:14px}
+#root .campus-workflow ol li{padding:8px 0}
+#root .campus-service-card{min-height:120px;padding:15px}
+
+/* Consistent staff / Principal dark-blue navigation, as preview Design C. */
+#root .staff-shell{background:#fff!important}
+#root .staff-sidebar{
+  width:203px!important;flex:0 0 203px!important;
+  background:#183f6a!important;color:#dbe7f4!important;
+  border-right:1px solid #183f6a!important;
+  padding:15px 9px!important;min-height:calc(100vh - 52px)!important;
+  box-shadow:none!important;
+}
+#root .staff-sidebar :is(h2,h3,p,span){color:#dbe7f4!important}
+#root .staff-sidebar :is(.text-slate-800,.text-slate-900,.text-white){color:#fff!important}
+#root .staff-sidebar svg{color:#dbe7f4}
+#root .staff-sidebar>div:first-child{padding:0 8px 11px;border-bottom:1px solid #3c6084;margin-bottom:9px}
+#root .staff-sidebar>div:first-child h2{font-size:12px;font-weight:700}
+#root .staff-sidebar>div:first-child p{display:none}
+#root .staff-sidebar>nav+div{display:none}
+#root .staff-nav-item{
+  width:100%;margin:2px 0;padding:9px 10px;min-height:35px;
+  border:0;border-radius:3px;background:transparent;
+  color:#dbe7f4!important;font-size:12px;font-weight:500;gap:9px
+}
+#root .staff-nav-item svg{color:#dbe7f4!important;width:16px;height:16px}
+#root .staff-nav-item:hover{background:#244f7b!important;color:white!important}
+#root .staff-nav-active,#root .staff-nav-active:hover{background:#32628e!important;color:#fff!important;border:0!important;font-weight:700}
+#root .staff-nav-active::before{top:0!important;bottom:0!important;border-radius:0;background:#e6eff9!important}
+#root .staff-shell>main{background:#fff!important;padding:21px 23px 30px!important}
+#root .staff-shell main>div{max-width:none}
+#root .staff-shell main>header{margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid #e0e7ee}
+#root .staff-shell main>header p[class*="uppercase"]{display:none}
+#root .staff-shell main>header p[class*="text-slate-500"]{display:none}
+#root .staff-shell .space-y-7 > * + *{margin-top:16px}
+#root .staff-shell .space-y-6 > * + *{margin-top:14px}
+#root .staff-shell .grid{gap:10px}
+
+/* Admin: preserve its JS tabs/pages and place left menu on dark blue. */
+#root .sd-admin-workspace{background:#fff;max-width:none;padding:17px 18px 25px!important}
+#root .sd-admin-workspace>div:first-child{margin-bottom:13px;padding-bottom:12px}
+#root .sd-admin-workspace>div:first-child p{display:none}
+#root .sd-admin-layout{grid-template-columns:203px minmax(0,1fr);gap:0}
+#root .sd-admin-sidebar{background:#183f6a!important;color:#dbe7f4!important;border:0!important;min-height:calc(100vh - 120px);margin-left:-18px;padding:15px 9px!important;border-radius:0!important}
+#root .sd-admin-sidebar>div:first-child{border-bottom:1px solid #3c6084!important;margin:0 5px 9px;padding:3px 5px 11px}
+#root .sd-admin-sidebar>div:first-child p:first-child{display:none}
+#root .sd-admin-sidebar>div:first-child p:last-child{font-size:12px;font-weight:700;color:white!important;margin-top:0}
+#root .sd-admin-sidebar nav{margin-top:7px}
+#root .sd-admin-nav{border:0!important;color:#dbe7f4!important;min-height:36px;gap:9px;font-weight:500;background:transparent!important}
+#root .sd-admin-nav svg{color:#dbe7f4!important;width:16px;height:16px}
+#root .sd-admin-nav:hover{background:#244f7b!important;color:#fff!important}
+#root .sd-admin-nav-active{background:#32628e!important;color:#fff!important;font-weight:700;border-left:3px solid #e6eff9!important;padding-left:9px!important}
+#root .sd-admin-nav-active span:last-child{display:none}
+#root .sd-admin-content{padding:0 0 0 18px}
+#root .sd-admin-content>section{margin-bottom:12px}
+#root .sd-admin-content .grid{gap:10px}
+
+/* Student: same left navy navigation, no extra selection tiles. */
+#root .sd-student-layout{display:flex;min-height:calc(100vh - 52px);background:#fff}
+#root .sd-student-sidebar{width:203px;flex:0 0 203px;background:#183f6a;color:#dbe7f4;padding:16px 9px}
+#root .sd-student-sidebar h2{padding:4px 11px 13px;border-bottom:1px solid #3c6084;margin-bottom:11px;color:#fff;font-size:11px;font-weight:700}
+#root .sd-student-sidebar nav{display:grid;gap:2px}
+#root .sd-student-nav{display:flex;align-items:center;gap:9px;width:100%;min-height:36px;padding:9px 10px;background:transparent;color:#dbe7f4;border:0;border-radius:3px;font-size:12px;text-align:left}
+#root .sd-student-nav:hover{background:#244f7b}
+#root .sd-student-nav.active{background:#32628e;border-left:3px solid #e6eff9;padding-left:7px;color:#fff;font-weight:700}
+#root .sd-student-content{flex:1;min-width:0;padding:20px 23px 30px}
+#root .sd-workspace-header{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #dce3eb;padding-bottom:13px;margin-bottom:15px}
+#root .sd-student-id{font-size:11px;color:#596d82;font-weight:600}
+#root .sd-overview-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#root .sd-overview-links h2{font-size:14px;font-weight:700;color:#1b3049;margin-bottom:7px}
+#root .sd-overview-links p{font-size:12px;color:#5c6d80;min-height:36px;margin-bottom:12px;line-height:1.5}
+#root .sd-step-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:13px}
+#root .sd-step-row .card{padding:11px!important}
+#root .sd-step-row .card>div:first-child{margin-bottom:7px}
+#root .sd-step-row h3{font-size:12px}
+#root .sd-step-row p{font-size:11px;line-height:1.4}
+#root .sd-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#root .sd-profile-grid>div{padding:11px;border:1px solid #dce3eb;border-radius:3px}
+#root .sd-profile-grid span{display:block;color:#67788b;font-size:11px;margin-bottom:6px}
+#root .sd-profile-grid strong{display:block;font-size:12px;color:#253b52;overflow-wrap:anywhere}
+
+/* Limit empty metadata & big gaps while preserving form content and actions. */
+#root .sd-student-content .campus-service-section>header{margin-bottom:11px}
+#root .sd-student-content .campus-service-section>header p.tiny{display:none}
+#root .sd-student-content .card{padding:13px 15px}
+#root .sd-student-content .space-y-5 > * + *{margin-top:12px}
+#root .sd-student-content .space-y-6 > * + *{margin-top:14px}
+#root .sd-admin-content .card{border-radius:3px!important}
+#root .sd-admin-content h2,#root .sd-student-content h2{letter-spacing:0}
+
+@media(max-width:800px){
+  #root .staff-sidebar{width:190px!important;flex-basis:190px!important}
+  #root .sd-student-sidebar{width:190px;flex-basis:190px}
+  #root .sd-admin-layout{grid-template-columns:190px minmax(0,1fr)}
+  #root .sd-admin-content{padding-left:12px}
+}
+@media(max-width:767px){
+  #root .staff-sidebar{width:min(280px,83vw)!important;flex-basis:auto!important;position:fixed;min-height:100vh!important;top:0!important}
+  #root .staff-sidebar.staff-sidebar-open{transform:translateX(0)!important}
+  #root .staff-shell>main{padding:16px!important}
+  #root .sd-admin-layout{display:block}
+  #root .sd-admin-sidebar{min-height:0;display:none;margin-left:0;margin-bottom:12px}
+  #root .sd-admin-sidebar.block{display:block}
+  #root .sd-admin-content{padding-left:0}
+  #root .sd-student-layout{display:block}
+  #root .sd-student-sidebar{width:100%;padding:7px 10px}
+  #root .sd-student-sidebar h2{display:none}
+  #root .sd-student-sidebar nav{display:flex;gap:5px;overflow-x:auto}
+  #root .sd-student-nav{min-height:33px;width:auto;flex:0 0 auto;white-space:nowrap;padding:8px;font-size:11px}
+  #root .sd-student-nav.active{padding-left:6px}
+  #root .sd-student-content{padding:16px 12px}
+  #root .sd-step-row{grid-template-columns:1fr;gap:6px}
+  #root .sd-overview-links{grid-template-columns:1fr}
+  #root .sd-profile-grid{grid-template-columns:1fr}
+  #root .sd-workspace-header{margin-bottom:12px}
+  #root .campus-brand-name{font-size:11px}
+  #root th,#root td{white-space:nowrap}
+}
+@media(prefers-reduced-motion:reduce){
+  #root *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+
+@media(max-width:767px){#root .staff-sidebar[class*="!translate-x-0"]{transform:translateX(0)!important}}
+
+/* Compact entry page for Student/Employee login routes. */
+#root .sd-public-home{padding:44px 18px;background:#fff;min-height:calc(100vh - 52px)}
+#root .sd-public-intro{max-width:850px;margin:0 auto}
+#root .sd-public-intro h1{font-size:23px;font-weight:700;line-height:1.35;color:#183f6a;margin-bottom:11px}
+#root .sd-public-intro>p{font-size:13px;color:#5e7288;margin-bottom:24px}
+#root .sd-public-entries{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#root .sd-public-entry{border:1px solid #d4dfe9;border-radius:3px;padding:17px;display:flex;gap:12px;align-items:center;text-decoration:none;color:#205a94}
+#root .sd-public-entry:hover{border-color:#8db1cf;background:#f8fbff}
+#root .sd-public-entry span{display:flex;flex:1;flex-direction:column;gap:5px;color:#213d5a}
+#root .sd-public-entry strong{font-size:13px}
+#root .sd-public-entry small{font-size:11px;color:#6a7d90}
+#root .sd-captcha{padding:12px;background:#f5f8fb;border:1px solid #d8e1e9;border-radius:3px}
+@media(max-width:600px){#root .sd-public-entries{grid-template-columns:1fr}#root .sd-public-intro h1{font-size:20px}}
+
+/* ==============================================================
+ * Professional Administration — compact correction
+ * Single top bar, single page title, clear public home/login.
+ * Preserves all API calls, form fields, permissions and workflows.
+ * ============================================================== */
+#root .campus-topbar { position: relative; z-index: 60; }
+#root .campus-topbar-inner { min-height: 52px; height: 52px; padding: 0 17px; max-width: none; }
+#root .campus-brand { gap: 9px; max-width: calc(100% - 116px); }
+#root .campus-brand-mark { height: 29px; width: 29px; border-radius: 3px; font-size: 10px; }
+#root .campus-brand-name { font-size: 13px; font-weight: 700; color: #183f6a; line-height: 1.2; display: block; }
+#root .campus-topbar [aria-label="Account settings"] { z-index: 70; }
+#root .campus-topbar button[aria-haspopup="true"] { min-height: 32px !important; }
+#root .campus-topbar .ml-auto { flex-shrink: 0; }
+
+/* Public-facing pages must feel like the same working application as the dashboards. */
+#root .sd-public-frame {
+  display: grid;
+  grid-template-columns: 203px minmax(0, 1fr);
+  min-height: calc(100vh - 52px);
+  background: #fff;
+}
+#root .sd-public-rail { background: #183f6a; padding: 16px 9px; color: #dbe7f4; }
+#root .sd-public-rail-title { margin: 0 7px 10px; padding: 4px 5px 12px; border-bottom: 1px solid #3c6084; color: #fff; font-size: 11px; font-weight: 700; }
+#root .sd-public-rail nav { display: grid; gap: 2px; }
+#root .sd-public-rail-link { display: block; text-decoration: none; padding: 9px 10px; border-radius: 3px; color: #dbe7f4; font-size: 12px; line-height: 1.4; }
+#root .sd-public-rail-link:hover { color: #fff; background: #244f7b; }
+#root .sd-public-rail-link.active { color: #fff; background: #32628e; border-left: 3px solid #e6eff9; padding-left: 7px; font-weight: 700; }
+#root .sd-public-workspace { min-width: 0; padding: 19px 22px 28px; }
+#root .sd-entry-header { margin-bottom: 14px; padding-bottom: 11px; border-bottom: 1px solid #dce3eb; }
+#root .sd-entry-header h1 { font-size: 20px; font-weight: 700; color: #1b3049; line-height: 1.3; }
+#root .sd-entry-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; max-width: 960px; }
+#root .sd-entry-option { background: #fff; border: 1px solid #d8e1e9; border-radius: 3px; padding: 16px; min-height: 167px; display: flex; flex-direction: column; align-items: flex-start; }
+#root .sd-entry-option-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; color: #205a94; }
+#root .sd-entry-option-head h2 { font-size: 15px; font-weight: 700; color: #1b3049; margin: 0; }
+#root .sd-entry-option p { font-size: 12px; color: #53667b; margin: 0 0 17px; line-height: 1.5; }
+#root .sd-entry-option .btn { margin-top: auto; text-decoration: none; }
+#root .sd-auth-area { max-width: 500px; }
+#root .sd-auth-area .sd-signin-card { max-width: 500px; width: 100%; padding: 18px; border-radius: 3px; }
+#root .sd-auth-area .sd-signin-card h1 { margin: 0 0 16px; border-bottom: 1px solid #dce3eb; padding: 0 0 11px; font-size: 19px; }
+#root .sd-auth-area .sd-signin-card form { display: grid; gap: 13px; }
+#root .sd-auth-area .sd-signin-card form > * + * { margin-top: 0 !important; }
+#root .sd-auth-area .sd-signin-card .sd-inline-meta { padding-top: 11px; margin-top: 13px; }
+#root .sd-auth-area .sd-signin-card .sd-error-box { margin: 0 0 13px; }
+
+/* Employees: eliminate the second account bar and redundant dashboard breadcrumbs. */
+#root .staff-shell { min-height: calc(100vh - 52px) !important; }
+#root .staff-shell > main { padding: 14px 18px 25px !important; }
+#root .staff-shell > main > div > header {
+  margin: 0 0 13px !important; padding: 0 0 10px !important;
+  border-bottom: 1px solid #dce3eb !important; gap: 9px !important;
+}
+#root .staff-shell > main > div > header .section-title { font-size: 19px !important; }
+#root .staff-sidebar { padding-top: 13px !important; }
+#root .staff-sidebar > nav { margin-top: 8px !important; }
+#root .staff-sidebar > div:first-child { margin-top: 0; margin-bottom: 8px; padding-bottom: 10px; }
+#root .staff-sidebar > div:first-child h2 { font-size: 12px; line-height: 1.3; }
+#root .staff-sidebar > p[class*="uppercase"] { display: none; }
+#root .staff-sidebar > div[class*="mt-8"] { display: none; }
+#root .staff-shell .space-y-7 > * + * { margin-top: 12px; }
+#root .staff-shell .space-y-6 > * + * { margin-top: 12px; }
+#root .staff-shell .grid { gap: 9px; }
+
+/* Administration: sidebar and main content align directly below the top bar. */
+#root .sd-admin-workspace { padding: 0 !important; }
+#root .sd-admin-layout { gap: 0 !important; grid-template-columns: 203px minmax(0,1fr); }
+#root .sd-admin-sidebar { margin: 0 !important; min-height: calc(100vh - 52px); padding: 13px 9px !important; }
+#root .sd-admin-content { padding: 14px 18px 25px; }
+#root .sd-admin-page-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; padding-bottom: 10px; border-bottom: 1px solid #dce3eb; }
+#root .sd-admin-page-header .section-title { font-size: 19px; }
+#root .sd-admin-content .space-y-4 > * + * { margin-top: 12px; }
+#root .sd-admin-content .card { padding: 13px 14px; }
+#root .sd-admin-content .grid { gap: 9px; }
+
+/* Student: same one-title layout and compact service panels. */
+#root .sd-student-content { padding: 14px 18px 25px; }
+#root .sd-workspace-header { padding-bottom: 10px; margin-bottom: 13px; }
+#root .sd-workspace-header .section-title { font-size: 19px; }
+#root .sd-student-sidebar { padding-top: 13px; }
+#root .sd-student-sidebar h2 { padding-bottom: 10px; margin-bottom: 8px; }
+#root .sd-overview-links p { min-height: 0; margin-bottom: 10px; }
+#root .sd-step-row { margin-bottom: 10px; }
+#root .sd-step-row .card { padding: 10px !important; }
+#root .sd-student-content .card { padding: 12px 13px; }
+#root .sd-student-content .campus-service-section { margin-bottom: 12px; }
+#root .sd-student-content .space-y-5 > * + * { margin-top: 10px; }
+#root .sd-student-content .space-y-6 > * + * { margin-top: 11px; }
+
+@media (max-width: 800px) {
+  #root .sd-public-frame { grid-template-columns: 180px minmax(0,1fr); }
+  #root .sd-admin-layout { grid-template-columns: 180px minmax(0,1fr); }
+}
+@media (max-width: 767px) {
+  #root .campus-topbar-inner { padding: 0 10px; }
+  #root .campus-brand-name { font-size: 11px; }
+  #root .sd-public-frame { display: block; }
+  #root .sd-public-rail { padding: 7px 10px; }
+  #root .sd-public-rail-title { display: none; }
+  #root .sd-public-rail nav { display: flex; overflow-x: auto; gap: 5px; }
+  #root .sd-public-rail-link { white-space: nowrap; flex: 0 0 auto; padding: 8px 9px; font-size: 11px; }
+  #root .sd-public-rail-link.active { padding-left: 6px; }
+  #root .sd-public-workspace { padding: 14px 12px 20px; }
+  #root .sd-entry-options { grid-template-columns: 1fr; }
+  #root .sd-entry-option { min-height: 125px; padding: 13px; }
+  #root .staff-shell > main { padding: 12px !important; }
+  #root .sd-admin-layout { display: block; }
+  #root .sd-admin-content { padding: 12px; }
+  #root .sd-admin-workspace > div[class*="lg:hidden"] { padding: 9px 12px 0; margin-bottom: 7px; }
+  #root .sd-admin-sidebar { display: none; }
+  #root .sd-admin-sidebar.block { display: block; min-height: 0; }
+  #root .sd-student-content { padding: 12px; }
+}
+
+/* ============================================================
+ * SDRC public Home and Login (professional white / blue)
+ * Public routes only: no dashboard rail or admin shell.
+ * ============================================================ */
+#root .sdrc-public { min-height:100vh; background:#fff; color:#20354c; font-family:Arial,Helvetica,sans-serif; }
+#root .sdrc-public-accent { height:4px; background:#183f6a; }
+#root .sdrc-public-header { height:68px; background:#fff; border-bottom:1px solid #dce4ed; }
+#root .sdrc-public-header-inner { height:100%; max-width:1320px; margin:0 auto; padding:0 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+#root .sdrc-public-brand { min-width:0; display:flex; align-items:center; gap:12px; color:#193c62; font-size:14px; font-weight:700; line-height:1.35; text-decoration:none; max-width:590px; }
+#root .sdrc-public-brand:hover { color:#193c62; }
+#root .sdrc-public-mark { display:grid;place-items:center;flex-shrink:0; width:41px;height:41px; border-radius:3px; color:#fff;background:#183f6a; font-size:15px; font-weight:700; }
+#root .sdrc-public-links { display:flex; align-items:center; gap:22px; flex-shrink:0; }
+#root .sdrc-public-navlink { color:#40536a; font-size:12px; font-weight:600; text-decoration:none; }
+#root .sdrc-public-navlink:hover, #root .sdrc-public-navlink.current:not(.sdrc-public-login-link) { color:#205a94; }
+#root .sdrc-public-login-link { color:#fff!important; background:#205a94; padding:10px 14px; border:1px solid #205a94; border-radius:3px; }
+#root .sdrc-public-login-link:hover { background:#174a7e; }
+#root .sdrc-public-content { min-height:calc(100vh - 72px); }
+#root .sdrc-home-hero { max-width:1320px; margin:0 auto; padding:44px 46px 36px; display:grid; grid-template-columns:minmax(0,1.45fr) minmax(265px,.75fr); align-items:center; gap:35px; }
+#root .sdrc-home-intro h1 { font-size:29px; max-width:670px; line-height:1.28; font-weight:700; letter-spacing:-.035em; color:#173d66; margin:0 0 13px; }
+#root .sdrc-home-intro p { max-width:630px; margin:0 0 23px; font-size:14px; line-height:1.65; color:#516579; }
+#root .sdrc-home-actions { display:flex; gap:10px; flex-wrap:wrap; }
+#root .sdrc-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:38px; border-radius:3px; padding:9px 14px; font-size:12px; font-weight:700; line-height:1.3; border:1px solid #205a94; text-decoration:none; cursor:pointer; transition:background .12s,border-color .12s; }
+#root .sdrc-button-primary { background:#205a94; color:#fff; }
+#root .sdrc-button-primary:hover:not(:disabled) { background:#174a7e; color:#fff; }
+#root .sdrc-button-outline { background:#fff; color:#205a94; border-color:#b8c8d8; }
+#root .sdrc-button-outline:hover:not(:disabled) { background:#f1f6fb; }
+#root .sdrc-button:disabled { opacity:.6; cursor:not-allowed; }
+#root .sdrc-home-process { background:#eef4fa; border:1px solid #d2dfeb; border-radius:4px; padding:19px; display:grid; gap:9px; }
+#root .sdrc-process-row { display:flex; align-items:center; gap:12px; padding:12px 13px; min-height:46px; background:#fff; border:1px solid #d7e2ed; border-radius:3px; color:#264969; font-size:12px; font-weight:700; }
+#root .sdrc-process-number { display:grid; place-items:center; flex-shrink:0; width:23px;height:23px; background:#205a94;color:#fff;border-radius:2px; font-weight:700;font-size:11px; }
+#root .sdrc-home-services { border-top:1px solid #e2e9f0; max-width:1320px; margin:0 auto; padding:25px 46px 34px; }
+#root .sdrc-home-services h2 { color:#1d3f62; margin:0 0 14px; font-size:16px; font-weight:700; }
+#root .sdrc-service-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px; }
+#root .sdrc-service-card { border:1px solid #d6e1ea; border-radius:3px; padding:17px 18px; background:#fff; }
+#root .sdrc-service-card h3 { color:#20496f; margin:0 0 8px; font-size:14px; font-weight:700; }
+#root .sdrc-service-card p { font-size:12px; color:#596e81; line-height:1.6; margin:0; }
+#root .sdrc-login-stage { min-height:calc(100vh - 72px); background:#f6f8fb; padding:32px 16px; display:flex; align-items:center; justify-content:center; }
+#root .sdrc-login-card { max-width:420px; width:100%; border:1px solid #cfdbe7; border-radius:4px; background:#fff; box-shadow:0 3px 12px rgba(24,63,106,.05); overflow:hidden; }
+#root .sdrc-login-stripe { height:4px; background:#205a94; }
+#root .sdrc-login-body { padding:27px 29px 25px; }
+#root .sdrc-login-body h1 { font-size:21px; font-weight:700; color:#193f67; line-height:1.3; margin:0 0 7px; }
+#root .sdrc-login-description { color:#65788a; font-size:12px; line-height:1.5; margin:0 0 21px; }
+#root .sdrc-login-form { display:grid; gap:15px; }
+#root .sdrc-login-form .label { color:#304862; font-size:12px; margin:0 0 6px; font-weight:700; }
+#root .sdrc-login-form .field { display:block; width:100%; height:41px; border:1px solid #bbcbdc; border-radius:3px!important; padding:10px 12px; font-size:13px; color:#20354c; background:#fff; }
+#root .sdrc-login-form .field:focus { border-color:#205a94; box-shadow:0 0 0 2px #e7f0fa; }
+#root .sdrc-login-submit { width:100%; height:41px; font-size:12px; margin-top:1px; }
+#root .sdrc-login-body .sd-error-box { margin-bottom:16px; padding:10px 12px; font-size:12px; }
+#root .sdrc-login-success { margin:0 0 15px; padding:10px 12px; font-size:12px; color:#286447; border:1px solid #b5d7c7; background:#eef7f1; border-radius:3px; }
+#root .sdrc-login-switch { margin:17px 0 0; font-size:11px; color:#617487; text-align:center; }
+#root .sdrc-login-switch a { color:#205a94; font-weight:700; text-decoration:none; }
+#root .sdrc-login-switch a:hover { text-decoration:underline; }
+#root .sdrc-login-link-button { text-align:center; border:0; background:transparent; color:#205a94; padding:3px; font-size:11px; font-weight:600; }
+#root .sdrc-login-link-button:hover:not(:disabled) { text-decoration:underline; }
+#root .sdrc-login-captcha { display:grid; gap:10px; padding:12px; border:1px solid #d8e1e9; background:#f5f8fb; }
+#root .sdrc-captcha-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+#root .sdrc-captcha-row img { max-width:180px; width:60%; height:auto; border:1px solid #ccd8e4; background:white; }
+@media(max-width:760px){
+  #root .sdrc-public-header-inner { padding:0 13px; gap:9px; }
+  #root .sdrc-public-brand { font-size:11px; gap:8px; }
+  #root .sdrc-public-mark { height:33px; width:33px; font-size:12px; }
+  #root .sdrc-public-links { gap:9px; }
+  #root .sdrc-public-navlink { font-size:10px; }
+  #root .sdrc-public-login-link { padding:8px 9px; }
+  #root .sdrc-home-hero { padding:29px 20px 22px; grid-template-columns:1fr; gap:17px; }
+  #root .sdrc-home-intro h1 { font-size:23px; }
+  #root .sdrc-home-process { grid-template-columns:repeat(3,minmax(0,1fr)); padding:10px; gap:7px; }
+  #root .sdrc-process-row { padding:8px; font-size:10px; gap:5px; min-height:55px; }
+  #root .sdrc-process-number { width:20px;height:20px; }
+  #root .sdrc-home-services { padding:20px; }
+  #root .sdrc-service-grid { grid-template-columns:1fr; }
+  #root .sdrc-login-body { padding:23px 22px; }
+}
+@media(max-width:450px){
+  #root .sdrc-public-brand { max-width:190px; font-size:10px; }
+  #root .sdrc-public-links { gap:5px; }
+  #root .sdrc-public-links .sdrc-public-navlink:first-child { display:none; }
+  #root .sdrc-public-navlink { font-size:10px; }
+  #root .sdrc-public-header { height:62px; }
+  #root .sdrc-login-stage { min-height:calc(100vh - 66px); }
+  #root .sdrc-home-process { grid-template-columns:1fr; }
+  #root .sdrc-process-row { min-height:40px; }
+}

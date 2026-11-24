@@ -14,6 +14,7 @@ export default function OriginalCollection({ applicationId }) {
   const [identity, setIdentity] = useState(false)
   const [remarks, setRemarks] = useState('')
   const [error, setError] = useState('')
+  const [controlError, setControlError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -32,7 +33,7 @@ export default function OriginalCollection({ applicationId }) {
   const selectedItems = Object.entries(quantities).filter(([_, value]) => Number(value) > 0).map(([id, quantity]) => ({ documentId: Number(id), quantity: Number(quantity) }))
 
   return <section className="card campus-service-section p-5 sm:p-6" aria-label="Original certificate collection">
-    <div className="mb-5 flex flex-wrap items-start justify-between gap-3"><div><p className="campus-eyebrow mb-1">Administration / No Dues Collection</p><h2 className="campus-service-heading flex items-center gap-2"><ClipboardCheck size={19} /> Original documents — physical handover</h2><p className="tiny mt-2">Create the expected-document list at the first visit. Record exactly what the student collects on each visit.</p></div><button type="button" className="btn btn-muted" onClick={load} disabled={loading}><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div>
+    <div className="mb-5 flex flex-wrap items-start justify-between gap-3"><div><h2 className="campus-service-heading flex items-center gap-2"><ClipboardCheck size={19} /> Original documents — physical handover</h2><p className="tiny mt-2">Create the expected-document list at the first visit. Record exactly what the student collects on each visit.</p></div><button type="button" className="btn btn-muted" onClick={load} disabled={loading}><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div>
     <ErrorPanel error={error} />
     {notice && <p className="campus-service-note mb-5" role="status">{notice}</p>}
     {loading && !data && <p className="tiny py-3">Loading original-document records…</p>}
@@ -44,7 +45,11 @@ export default function OriginalCollection({ applicationId }) {
         <label className="w-24"><span className="label">Quantity</span><input className="field" type="number" min={1} max={20} value={item.quantity} onChange={e => setExpected(old => old.map((x, i) => i === index ? { ...x, quantity: Number(e.target.value) } : x))} /></label>
         <button type="button" className="btn btn-muted" aria-label={`Remove ${item.name}`} onClick={() => setExpected(old => old.filter((_, i) => i !== index))}><Trash2 size={15} /> Remove</button>
       </div>)}</div>
-      <div className="mt-5 flex flex-wrap gap-2"><button type="button" className="btn btn-muted" onClick={() => setExpected(old => [...old, { name: '', quantity: 1 }])}><Plus size={15} /> Add document</button><button type="button" className="btn btn-primary" disabled={busy || !expected.length || expected.some(x => !x.name.trim() || x.quantity < 1)} onClick={() => run(() => api(`/admin/original-collections/${applicationId}/initialize`, { method: 'POST', body: expected }))}>Confirm expected documents</button></div>
+      <ErrorPanel error={controlError} /><div className="mt-5 flex flex-wrap gap-2"><button type="button" className="btn btn-muted" onClick={() => setExpected(old => [...old, { name: '', quantity: 1 }])}><Plus size={15} /> Add document</button><button type="button" className="btn btn-primary" disabled={busy} onClick={() => {
+        if (!expected.length) { setControlError('Add at least one expected original document.'); return }
+        if (expected.some(x => !x.name.trim() || x.quantity < 1)) { setControlError('Every expected document must have a name and positive quantity.'); return }
+        setControlError(''); run(() => api(`/admin/original-collections/${applicationId}/initialize`, { method: 'POST', body: expected }))
+      }}>Confirm expected documents</button></div>
     </div>}
 
     {data?.initialized && <div>
@@ -57,12 +62,16 @@ export default function OriginalCollection({ applicationId }) {
       <div className="mt-4 flex flex-wrap gap-2"><input className="field max-w-sm flex-1" placeholder="Additional expected document name" aria-label="New expected document name" value={addName} onChange={e => setAddName(e.target.value)} /><button type="button" className="btn btn-muted" disabled={!addName.trim() || busy} onClick={() => run(async () => { await api(`/admin/original-collections/${applicationId}/documents`, { method: 'POST', body: { name: addName, quantity: 1 } }); setAddName('') })}><Plus size={15} /> Add expected document</button></div>
       {remaining > 0 ? <div className="mt-6 rounded-md border border-slate-200 bg-[#fafbfc] p-5">
         <h3 className="campus-service-subheading mb-3">Record this collection visit</h3>
-        <label className="flex gap-3 text-sm leading-6 text-slate-700"><input type="checkbox" className="mt-1.5" checked={identity} onChange={e => setIdentity(e.target.checked)} /><span>I have verified the student in person and confirm that only the student is collecting these documents.</span></label>
+        <label className="flex gap-3 text-sm leading-6 text-slate-700"><input type="checkbox" className="mt-1.5" checked={identity} onChange={e => { setIdentity(e.target.checked); setControlError('') }} /><span>I have verified the student in person and confirm that only the student is collecting these documents.</span></label>
         <label className="block mt-4"><span className="label">Handover remarks (optional)</span><textarea className="field" rows={2} value={remarks} onChange={e => setRemarks(e.target.value)} /></label>
-        <div className="flex flex-wrap items-center justify-between gap-3 mt-5"><p className="tiny">{selectedItems.reduce((sum, item) => sum + item.quantity, 0)} document(s) selected for this visit</p><button className="btn btn-primary" disabled={busy || !identity || !selectedItems.length} onClick={() => run(async () => {
-          await api(`/admin/original-collections/${applicationId}/visits`, { method: 'POST', body: { identityVerified: identity, remarks, items: selectedItems } })
-          setQuantities({}); setIdentity(false); setRemarks('')
-        })}> <CheckCircle2 size={16} /> Confirm physical handover</button></div>
+        <ErrorPanel error={controlError} /><div className="flex flex-wrap items-center justify-between gap-3 mt-5"><p className="tiny">{selectedItems.reduce((sum, item) => sum + item.quantity, 0)} document(s) selected for this visit</p><button className="btn btn-primary" disabled={busy} onClick={() => {
+          if (!identity) { setControlError('Confirm student identity before recording a handover.'); return }
+          if (!selectedItems.length) { setControlError('Select at least one document to collect.'); return }
+          setControlError(''); run(async () => {
+            await api(`/admin/original-collections/${applicationId}/visits`, { method: 'POST', body: { identityVerified: identity, remarks, items: selectedItems } })
+            setQuantities({}); setIdentity(false); setRemarks('')
+          })
+        }}> <CheckCircle2 size={16} /> Confirm physical handover</button></div>
       </div> : <p className="campus-service-note mt-6"><CheckCircle2 size={16} className="inline mr-2" />All expected documents have been collected.</p>}
       <div className="mt-7"><h3 className="campus-service-subheading flex items-center gap-2 mb-3"><History size={17} /> Collection visits</h3><div className="rounded-md border border-slate-200 px-4">{(data.visits || []).map(record => <div className="campus-service-row" key={record.visit.id}><p className="text-sm font-semibold">Visit #{record.visit.id} · {date(record.visit.handedOverAt)}</p><p className="tiny mt-1">{(record.items || []).map(line => { const d = data.documents.find(x => x.id === line.documentId); return `${d?.documentName || 'Document'} × ${line.quantity}` }).join(', ')} · {record.visit.remarks || 'No remarks'}</p></div>)}{!data.visits?.length && <Empty message="No handover visits recorded yet." />}</div></div>
       <div className="mt-7"><h3 className="campus-service-subheading mb-3">Checklist and handover audit</h3><div className="rounded-md border border-slate-200 px-4">{(data.history || []).map(event => <div key={event.id} className="campus-service-row"><p className="text-sm font-medium">{String(event.action).replaceAll('_', ' ')}</p><p className="tiny mt-1">{date(event.occurredAt)} · {event.details}</p></div>)}{!data.history?.length && <p className="tiny py-4">No audit events recorded.</p>}</div></div>

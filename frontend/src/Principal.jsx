@@ -130,7 +130,7 @@ function DateControls({ period, setPeriod, range, setRange }) {
 function Metric({ label, value, icon: Icon, detail }) {
   return (
     <div className="card min-w-0 p-4 sm:p-5">
-      <div className="flex items-start justify-between gap-3"><p className="text-[12px] font-medium leading-5 text-slate-500">{label}</p><span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-slate-100 text-slate-500"><Icon size={17} strokeWidth={1.7} /></span></div>
+      <div className="flex items-start justify-between gap-3"><p className="text-[12px] font-medium leading-5 text-slate-500">{label}</p><span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-slate-100 text-slate-500"><Icon size={17} strokeWidth={1.7}/></span></div>
       <p className="metric mt-3">{number(value)}</p>
       {detail && <p className="tiny mt-2">{detail}</p>}
     </div>
@@ -167,7 +167,7 @@ function StudentDetails({ item, onClose, onDecide, busy, onDownload }) {
         </header>
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-6 sm:px-7">
           <div className="card p-5">
-            <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="text-lg font-semibold text-slate-900">{item.studentName || item.rollNumber}</h3><p className="mt-1 text-sm text-slate-500">{item.rollNumber} · {item.branch || 'Branch not provided'}</p></div><Status value={item.status} /></div>
+            <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="text-lg font-semibold text-slate-900">{item.studentName || item.rollNumber}</h3><p className="mt-1 text-sm text-slate-500">{item.rollNumber} · {item.branch || 'Branch not provided'}</p></div><Status value={item.status}/></div>
             <dl className="mt-5 grid gap-3 sm:grid-cols-2">
               <KeyValue label="Submitted" value={dateLabel(item.submittedAt)} />
               <KeyValue label="Departments approved" value={`${progress(item)} / 17`} />
@@ -181,7 +181,7 @@ function StudentDetails({ item, onClose, onDecide, busy, onDownload }) {
             <div className="mb-3 flex items-center justify-between gap-3"><h3 className="text-sm font-bold text-slate-900">Department clearance</h3><span className="tiny">{progress(item)} of 17 approved</span></div>
             {approvals.length ? <div className="grid gap-3 sm:grid-cols-2">
               {approvals.map((approval, index) => <div key={approval.id ?? `${approval.department}-${index}`} className="rounded-md border border-slate-200 bg-white p-4">
-                <div className="mb-2 flex flex-wrap items-center justify-between gap-2"><p className="text-[13px] font-semibold text-slate-800">{approval.department}</p><Status value={approval.status} /></div>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2"><p className="text-[13px] font-semibold text-slate-800">{approval.department}</p><Status value={approval.status}/></div>
                 {approval.remarks && <p className="mt-2 break-words text-[12px] leading-5 text-slate-600">{approval.remarks}</p>}
                 <p className="tiny mt-2">{dateLabel(approval.decidedAt)}</p>
               </div>)}
@@ -205,10 +205,10 @@ function DecisionModal({ decision, remark, setRemark, busy, onCancel, onConfirm 
   return (
     <div className="fixed inset-0 z-[70] grid place-items-center bg-slate-950/45 p-4">
       <section className="card w-full max-w-lg p-6 sm:p-7" role="dialog" aria-modal="true" aria-label={decision.yes ? 'Confirm final approval' : 'Confirm principal rejection'}>
-        <div className="mb-4 flex items-start gap-3"><span className="grid h-11 w-11 place-items-center rounded-md bg-slate-100 text-slate-600">{decision.yes ? <CheckCircle2 size={21} /> : <XCircle size={21} />}</span><div><h2 className="text-lg font-bold text-slate-900">{decision.yes ? 'Confirm final approval' : 'Confirm rejection'}</h2><p className="mt-1 text-sm text-slate-500">{decision.item.studentName} · {decision.item.rollNumber}</p></div></div>
+        <div className="mb-4 flex items-start gap-3"><span className="grid h-11 w-11 place-items-center rounded-md bg-slate-100 text-slate-600">{decision.yes ? <CheckCircle2 size={21}/> : <XCircle size={21}/>}</span><div><h2 className="text-lg font-bold text-slate-900">{decision.yes ? 'Confirm final approval' : 'Confirm rejection'}</h2><p className="mt-1 text-sm text-slate-500">{decision.item.studentName} · {decision.item.rollNumber}</p></div></div>
         <label className="block"><span className="label">{decision.yes ? 'Approval remarks (optional)' : 'Rejection reason (required)'}</span><textarea className="field" rows={4} value={remark} onChange={(e) => setRemark(e.target.value)} placeholder={decision.yes ? 'Optional remarks for the student' : 'Enter a clear reason for rejection'} /></label>
         {!eligible && <p className="mt-3 text-xs text-amber-700">Final decisions require all 17 department approvals and a pending Principal application.</p>}
-        <div className="mt-6 flex justify-end gap-3"><button type="button" className="btn btn-muted" disabled={busy} onClick={onCancel}>Cancel</button><button type="button" className="btn btn-primary" disabled={busy || !eligible || (!decision.yes && !remark.trim())} onClick={onConfirm}>{busy && <LoaderCircle className="animate-spin" size={15} />} Confirm decision</button></div>
+        <div className="mt-6 flex justify-end gap-3"><button type="button" className="btn btn-muted" disabled={busy} onClick={onCancel}>Cancel</button><button type="button" className="btn btn-primary" disabled={busy || !eligible || (!decision.yes && !remark.trim())} onClick={onConfirm}>{busy && <LoaderCircle className="animate-spin" size={15}/>} Confirm decision</button></div>
       </section>
     </div>
   )
@@ -332,7 +332,7 @@ export default function Principal() {
       const href = URL.createObjectURL(blob)
       const anchor = document.createElement('a')
       anchor.href = href
-      anchor.download = `DCCMP-Department-Analytics.${format}`
+      anchor.download = `Student-Portal-Department-Analytics.${format}`
       document.body.appendChild(anchor)
       anchor.click()
       anchor.remove()
@@ -355,45 +355,44 @@ export default function Principal() {
       {mobileNav && <button type="button" className="fixed inset-0 z-40 bg-slate-950/35 md:hidden" aria-label="Close navigation" onClick={() => setMobileNav(false)} />}
       <aside className={`staff-sidebar fixed inset-y-0 left-0 z-50 w-[248px] -translate-x-full transition-transform duration-200 md:sticky md:top-0 md:h-[calc(100vh-75px)] md:translate-x-0 ${mobileNav ? '!translate-x-0' : ''}`} aria-label="Principal navigation">
         <div className="mb-6 flex items-start justify-between gap-2 px-2 pt-2">
-          <div className="flex items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-slate-200 bg-slate-100 text-slate-600"><ShieldCheck size={20} /></span><div><h2 className="text-sm font-bold text-slate-900">Principal Portal</h2><p className="mt-0.5 text-[11px] text-slate-500">Usharama College</p></div></div>
-          <button type="button" className="btn btn-muted md:hidden !min-h-8 !p-1.5" aria-label="Close navigation" onClick={() => setMobileNav(false)}><X size={17} /></button>
+          <div className="flex items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-slate-200 bg-slate-100 text-slate-600"><ShieldCheck size={20} /></span><div><h2 className="text-sm font-bold text-slate-900">Principal Portal</h2></div></div>
+          <button type="button" className="btn btn-muted md:hidden !min-h-8 !p-1.5" aria-label="Close navigation" onClick={() => setMobileNav(false)}><X size={17}/></button>
         </div>
         <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.12em] text-slate-400">Administration</p>
         <nav className="space-y-1" aria-label="Principal sections">
-          {NAVIGATION.map(({ key, label, icon: Icon }) => <button type="button" key={key} className={`staff-nav-item ${section === key ? 'staff-nav-active' : ''}`} aria-current={section === key ? 'page' : undefined} onClick={() => navigate(key)}><Icon size={17} strokeWidth={1.8} />{label}</button>)}
+          {NAVIGATION.map(({ key, label, icon: Icon }) => <button type="button" key={key} className={`staff-nav-item ${section === key ? 'staff-nav-active' : ''}`} aria-current={section === key ? 'page' : undefined} onClick={() => navigate(key)}><Icon size={17} strokeWidth={1.8}/>{label}</button>)}
         </nav>
-        <div className="mt-8 rounded-md border border-slate-100 bg-slate-50 p-4"><p className="text-xs font-semibold text-slate-700">Secure approvals</p><p className="mt-2 text-[11px] leading-relaxed text-slate-500">Final approval requires clearance from all 17 departments.</p></div>
       </aside>
 
       <main className="min-w-0 flex-1 px-4 py-6 sm:px-7 sm:py-8 xl:px-10">
         <div className="mx-auto max-w-[1480px]">
           <header className="mb-7 flex flex-wrap items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <button type="button" className="btn btn-muted !min-h-10 !px-3 md:hidden" onClick={() => setMobileNav(true)} aria-label="Open principal navigation"><Menu size={19} /></button>
-              <div><p className="mb-1 text-[11px] font-semibold uppercase tracking-[.1em] text-slate-400">Principal workspace</p><h1 className="section-title">{active?.label}</h1></div>
+              <button type="button" className="btn btn-muted !min-h-10 !px-3 md:hidden" onClick={() => setMobileNav(true)} aria-label="Open principal navigation"><Menu size={19}/></button>
+              <div><h1 className="section-title">{active?.label}</h1></div>
             </div>
-            {section !== 'reports' && <button type="button" className="btn btn-muted" onClick={reload} disabled={Boolean(loading[section])}><RefreshCw size={16} className={loading[section] ? 'animate-spin' : ''} /> Refresh</button>}
+            {section !== 'reports' && <button type="button" className="btn btn-muted" onClick={reload} disabled={Boolean(loading[section])}><RefreshCw size={16} className={loading[section] ? 'animate-spin' : ''}/> Refresh</button>}
           </header>
-          <Notice text={notice} onClose={() => setNotice('')} />
-          <SectionError error={errors.action} onRetry={reload} />
-          {(section === 'overview' || section === 'departments' || section === 'reports') && <DateControls period={period} setPeriod={setPeriod} range={range} setRange={setRange} />}
+          <Notice text={notice} onClose={() => setNotice('')}/>
+          <SectionError error={errors.action} onRetry={reload}/>
+          {(section === 'overview' || section === 'departments' || section === 'reports') && <DateControls period={period} setPeriod={setPeriod} range={range} setRange={setRange}/>}
 
           {section === 'overview' && <div className="space-y-7">
             <section>
               <PanelHeader title="Clearance at a glance" description="Current application statuses for the selected submission period." />
-              <SectionError error={errors.overview} onRetry={reload} />
-              {loading.overview && !overview ? <Loading /> : overview && <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-5">
-                <Metric label="Total submitted" value={overview.total} icon={Files} />
-                <Metric label="Principal approved" value={overview.approved} icon={CheckCircle2} />
-                <Metric label="Awaiting Principal" value={overview.pendingPrincipal} icon={Clock3} />
-                <Metric label="Department pending" value={overview.pendingDepartments} icon={ClipboardCheck} />
-                <Metric label="Unresolved rejected" value={overview.unresolvedRejected} icon={XCircle} />
+              <SectionError error={errors.overview} onRetry={reload}/>
+              {loading.overview && !overview ? <Loading/> : overview && <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-5">
+                <Metric label="Total submitted" value={overview.total} icon={Files}/>
+                <Metric label="Principal approved" value={overview.approved} icon={CheckCircle2}/>
+                <Metric label="Awaiting Principal" value={overview.pendingPrincipal} icon={Clock3}/>
+                <Metric label="Department pending" value={overview.pendingDepartments} icon={ClipboardCheck}/>
+                <Metric label="Unresolved rejected" value={overview.unresolvedRejected} icon={XCircle}/>
               </div>}
             </section>
             <section className="card p-5 sm:p-6">
-              <PanelHeader title="Department clearance overview" description="Current decision distribution across all 17 required departments." action={<button type="button" onClick={() => navigate('departments')} className="btn btn-muted">Detailed analytics <ArrowRight size={15} /></button>} />
-              <SectionError error={errors.departments} onRetry={reload} />
-              {loading.departments && !departments ? <Loading label="Loading department metrics…" /> : quickDepartments.length ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <PanelHeader title="Department clearance overview" description="Current decision distribution across all 17 required departments." action={<button type="button" onClick={() => navigate('departments')} className="btn btn-muted">Detailed analytics <ArrowRight size={15}/></button>} />
+              <SectionError error={errors.departments} onRetry={reload}/>
+              {loading.departments && !departments ? <Loading label="Loading department metrics…"/> : quickDepartments.length ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {quickDepartments.map((department) => {
                   const total = Math.max(0, Number(department.total) || 0)
                   const approved = Number(department.approved) || 0
@@ -401,48 +400,48 @@ export default function Principal() {
                   return <div key={department.departmentId ?? department.code} className="rounded-md border border-slate-100 bg-[#fafbfc] p-4">
                     <div className="mb-3 flex items-center justify-between gap-3"><span className="min-w-0 text-[13px] font-semibold text-slate-800">{department.department}</span><span className="shrink-0 text-[11px] text-slate-500">{approved}/{total} approved</span></div>
                     <div className="flex h-2 overflow-hidden rounded-full bg-slate-200" aria-label={`${approved} approved, ${rejected} rejected, ${department.pending} pending`}>
-                      <div className="bg-[#6c9584]" style={{ width: `${total ? Math.min(100, 100 * approved / total) : 0}%` }} />
-                      <div className="bg-[#ca9694]" style={{ width: `${total ? Math.min(100, 100 * rejected / total) : 0}%` }} />
+                      <div className="bg-[#6c9584]" style={{ width: `${total ? Math.min(100, 100 * approved / total) : 0}%` }}/>
+                      <div className="bg-[#ca9694]" style={{ width: `${total ? Math.min(100, 100 * rejected / total) : 0}%` }}/>
                     </div>
                     <p className="tiny mt-2">{department.pending} pending · {rejected} rejected</p>
                   </div>
                 })}
-              </div> : !loading.departments && !errors.departments && <Empty message="No department activity found for this reporting period." />}
+              </div> : !loading.departments && !errors.departments && <Empty message="No department activity found for this reporting period."/>}
             </section>
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="card p-6"><span className="mb-4 grid h-10 w-10 place-items-center rounded-md bg-slate-100 text-slate-600"><ClipboardCheck size={20} /></span><h3 className="text-[15px] font-semibold text-slate-900">Final approval workflow</h3><p className="mt-2 text-[13px] leading-6 text-slate-500">Review student requests after all 17 department accounts have approved them.</p><button className="btn btn-primary mt-5" type="button" onClick={() => navigate('applications')}>Review applications <ArrowRight size={16} /></button></div>
-              <div className="card p-6"><span className="mb-4 grid h-10 w-10 place-items-center rounded-md bg-slate-100 text-slate-600"><BarChart3 size={20} /></span><h3 className="text-[15px] font-semibold text-slate-900">Department analytics</h3><p className="mt-2 text-[13px] leading-6 text-slate-500">Compare shared department accounts, approval rates, unresolved requests and processing times.</p><button className="btn btn-muted mt-5" type="button" onClick={() => navigate('departments')}>View analytics <ArrowRight size={16} /></button></div>
+              <div className="card p-6"><span className="mb-4 grid h-10 w-10 place-items-center rounded-md bg-slate-100 text-slate-600"><ClipboardCheck size={20}/></span><h3 className="text-[15px] font-semibold text-slate-900">Final approval workflow</h3><p className="mt-2 text-[13px] leading-6 text-slate-500">Review student requests after all 17 department accounts have approved them.</p><button className="btn btn-primary mt-5" type="button" onClick={() => navigate('applications')}>Review applications <ArrowRight size={16}/></button></div>
+              <div className="card p-6"><span className="mb-4 grid h-10 w-10 place-items-center rounded-md bg-slate-100 text-slate-600"><BarChart3 size={20}/></span><h3 className="text-[15px] font-semibold text-slate-900">Department analytics</h3><p className="mt-2 text-[13px] leading-6 text-slate-500">Compare shared department accounts, approval rates, unresolved requests and processing times.</p><button className="btn btn-muted mt-5" type="button" onClick={() => navigate('departments')}>View analytics <ArrowRight size={16}/></button></div>
             </div>
           </div>}
 
           {section === 'applications' && <section>
             <PanelHeader title="All No Dues applications" description="Search and review applications before recording final Principal decisions." />
             <div className="card mb-5 grid gap-4 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-5">
-              <label><span className="label">Roll number</span><input className="field" placeholder="Search roll number" value={filters.roll} onChange={(e) => updateFilter('roll', e.target.value)} /></label>
-              <label><span className="label">Student name</span><input className="field" placeholder="Search student name" value={filters.name} onChange={(e) => updateFilter('name', e.target.value)} /></label>
-              <label><span className="label">Branch</span><input className="field" placeholder="Search branch" value={filters.branch} onChange={(e) => updateFilter('branch', e.target.value)} /></label>
+              <label><span className="label">Roll number</span><input className="field" placeholder="Search roll number" value={filters.roll} onChange={(e) => updateFilter('roll', e.target.value)}/></label>
+              <label><span className="label">Student name</span><input className="field" placeholder="Search student name" value={filters.name} onChange={(e) => updateFilter('name', e.target.value)}/></label>
+              <label><span className="label">Branch</span><input className="field" placeholder="Search branch" value={filters.branch} onChange={(e) => updateFilter('branch', e.target.value)}/></label>
               <label><span className="label">Overall status</span><select className="field" value={filters.status} onChange={(e) => updateFilter('status', e.target.value)}>{STATUS_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
               <label><span className="label">Sort by</span><select className="field" value={filters.sort} onChange={(e) => updateFilter('sort', e.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></label>
             </div>
-            <SectionError error={errors.applications} onRetry={reload} />
-            {loading.applications && !applications ? <Loading label="Loading student applications…" /> : applications && <>
-              <div className="card table-wrap"><table><thead><tr>{['Roll number', 'Student', 'Branch', 'Submitted (IST)', 'Status', 'Department approvals', ''].map((head) => <th key={head}>{head}</th>)}</tr></thead><tbody>{applicationItems.map((item) => <tr key={item.id}><td className="font-semibold text-slate-800">{item.rollNumber}</td><td>{item.studentName}</td><td>{item.branch}</td><td className="whitespace-nowrap">{dateLabel(item.submittedAt)}</td><td><Status value={item.status} /></td><td className="whitespace-nowrap">{progress(item)} / 17</td><td><button type="button" className="btn btn-muted !min-h-9 !py-2" onClick={() => setDetail(item)}>View details <ChevronRight size={14} /></button></td></tr>)}</tbody></table></div>
-              {!applicationItems.length && <div className="mt-4"><Empty message="No applications match your filters." /></div>}
-              <Pagination data={applications} onPage={setPage} />
+            <SectionError error={errors.applications} onRetry={reload}/>
+            {loading.applications && !applications ? <Loading label="Loading student applications…"/> : applications && <>
+              <div className="card table-wrap"><table><thead><tr>{['Roll number', 'Student', 'Branch', 'Submitted (IST)', 'Status', 'Department approvals', ''].map((head) => <th key={head}>{head}</th>)}</tr></thead><tbody>{applicationItems.map((item) => <tr key={item.id}><td className="font-semibold text-slate-800">{item.rollNumber}</td><td>{item.studentName}</td><td>{item.branch}</td><td className="whitespace-nowrap">{dateLabel(item.submittedAt)}</td><td><Status value={item.status}/></td><td className="whitespace-nowrap">{progress(item)} / 17</td><td><button type="button" className="btn btn-muted !min-h-9 !py-2" onClick={() => setDetail(item)}>View details <ChevronRight size={14}/></button></td></tr>)}</tbody></table></div>
+              {!applicationItems.length && <div className="mt-4"><Empty message="No applications match your filters."/></div>}
+              <Pagination data={applications} onPage={setPage}/>
             </>}
           </section>}
 
           {section === 'departments' && <section>
             <PanelHeader title="Department analytics" description="Department-level statistics and shared-login activity across all 17 mandatory clearances." />
-            <SectionError error={errors.departments} onRetry={reload} />
-            {loading.departments && !departments ? <Loading label="Loading department analytics…" /> : departments && <>
+            <SectionError error={errors.departments} onRetry={reload}/>
+            {loading.departments && !departments ? <Loading label="Loading department analytics…"/> : departments && <>
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="card p-5"><p className="text-xs text-slate-500">Active departments</p><p className="metric mt-3">{number(currentDepartments.length)}</p></div>
                 <div className="card p-5"><p className="text-xs text-slate-500">Current pending decisions</p><p className="metric mt-3">{number(currentDepartments.reduce((sum, item) => sum + (Number(item.pending) || 0), 0))}</p></div>
                 <div className="card p-5"><p className="text-xs text-slate-500">Historical decisions</p><p className="metric mt-3">{number(currentDepartments.reduce((sum, item) => sum + (Number(item.historicalApprovals) || 0) + (Number(item.historicalRejections) || 0), 0))}</p></div>
               </div>
               <div className="card table-wrap mt-5"><table><thead><tr>{['Department', 'Shared login', 'Total', 'Pending', 'Approved', 'Rejected', 'Approval rate', 'Avg processing time', 'Historical decisions'].map((head) => <th key={head}>{head}</th>)}</tr></thead><tbody>{currentDepartments.map((item) => <tr key={item.departmentId ?? item.code}><td className="min-w-40 font-semibold text-slate-800">{item.department}</td><td className="font-mono text-xs">{item.account}</td><td>{number(item.total)}</td><td>{number(item.pending)}</td><td>{number(item.approved)}</td><td>{number(item.rejected)}</td><td className="whitespace-nowrap">{item.approvalRate == null ? 'N/A' : `${Number(item.approvalRate).toFixed(1)}%`}</td><td className="whitespace-nowrap">{averageDuration(item.averageMinutes)}</td><td className="whitespace-nowrap">{number(item.historicalApprovals)} approved / {number(item.historicalRejections)} rejected</td></tr>)}</tbody></table></div>
-              {!currentDepartments.length && <div className="mt-4"><Empty message="No department analytics found for this reporting period." /></div>}
+              {!currentDepartments.length && <div className="mt-4"><Empty message="No department analytics found for this reporting period."/></div>}
               <p className="tiny mt-4">Shared logins identify department accounts, not individual staff members.</p>
             </>}
           </section>}
@@ -450,31 +449,31 @@ export default function Principal() {
           {section === 'search' && <section>
             <PanelHeader title="Student search" description="Search by a full or partial roll number, including students who have not submitted a No Dues application." />
             <div className="card mb-5 p-5 sm:p-6"><label htmlFor="principal-student-search" className="label">Roll number (at least 3 characters)</label><form className="flex flex-col gap-3 sm:flex-row" onSubmit={(event) => { event.preventDefault(); setSearchDebounced(searchText.trim()); setStudents(null) }}>
-              <div className="relative min-w-0 flex-1"><Search size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" /><input id="principal-student-search" className="field !pl-11" placeholder="Enter roll number" autoComplete="off" value={searchText} onChange={(e) => { setSearchText(e.target.value); setStudents(null) }} /></div>
-              <button className="btn btn-primary" type="submit" disabled={searchText.trim().length < 3}><Search size={15} /> Search students</button>
+              <div className="relative min-w-0 flex-1"><Search size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/><input id="principal-student-search" className="field !pl-11" placeholder="Enter roll number" autoComplete="off" value={searchText} onChange={(e) => { setSearchText(e.target.value); setStudents(null) }}/></div>
+              <button className="btn btn-primary" type="submit" disabled={searchText.trim().length < 3}><Search size={15}/> Search students</button>
             </form></div>
-            {searchText.trim().length < 3 ? <div className="card flex items-center gap-3 p-6 text-sm text-slate-500"><GraduationCap size={19} /> Enter at least 3 roll-number characters to search students.</div> : <>
-              <SectionError error={errors.students} onRetry={reload} />
-              {(loading.students || searchDebounced !== searchText.trim()) ? <Loading label="Searching students…" /> : students && (studentItems.length ? <div className="space-y-4">{studentItems.map((student) => <div key={student.rollNumber} className="card p-5 sm:p-6">
+            {searchText.trim().length < 3 ? <div className="card flex items-center gap-3 p-6 text-sm text-slate-500"><GraduationCap size={19}/> Enter at least 3 roll-number characters to search students.</div> : <>
+              <SectionError error={errors.students} onRetry={reload}/>
+              {(loading.students || searchDebounced !== searchText.trim()) ? <Loading label="Searching students…"/> : students && (studentItems.length ? <div className="space-y-4">{studentItems.map((student) => <div key={student.rollNumber} className="card p-5 sm:p-6">
                 <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-[15px] font-bold text-slate-900">{student.rollNumber}</p><p className="mt-1 break-words text-[13px] text-slate-500">{student.email || 'Email not available'}</p></div><span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600">{safeArray(student.applications).length} No Dues application(s)</span></div>
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px]"><span className="text-slate-500">Alumni registration</span><span className={`pill ${student.alumni ? 'status-APPROVED' : 'status-PENDING'}`}>{student.alumni ? 'Submitted' : 'Not submitted'}</span></div>
                 {student.alumni && <div className="mt-4 rounded-md border border-slate-100 bg-slate-50 p-4"><p className="mb-2 text-[12px] font-semibold text-slate-700">Alumni registration details</p><dl className="grid grid-cols-1 gap-x-6 gap-y-1 text-xs sm:grid-cols-2">{Object.entries(student.alumni).filter(([key, value]) => !['id', 'studentId'].includes(key) && value != null && typeof value !== 'object').map(([key, value]) => <div className="flex min-w-0 gap-2" key={key}><dt className="min-w-0 shrink-0 capitalize text-slate-500">{key.replace(/([A-Z])/g, ' $1')}:</dt><dd className="min-w-0 break-all font-medium text-slate-700">{String(value)}</dd></div>)}</dl></div>}
-                {safeArray(student.applications).length ? <div className="mt-4 space-y-2">{student.applications.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-100 bg-slate-50 px-4 py-3"><div><p className="text-[13px] font-semibold text-slate-800">{item.studentName} · {item.branch}</p><p className="tiny mt-1">Submitted {dateLabel(item.submittedAt)}</p></div><div className="flex flex-wrap items-center gap-2"><Status value={item.status} /><button type="button" className="btn btn-muted !min-h-9 !py-2" onClick={() => setDetail(item)}>View details</button></div></div>)}</div> : <p className="mt-4 text-[13px] text-slate-500">No Dues application has been submitted.</p>}
-              </div>)}</div> : !errors.students && <Empty message="No students match this roll number." />)}
+                {safeArray(student.applications).length ? <div className="mt-4 space-y-2">{student.applications.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-100 bg-slate-50 px-4 py-3"><div><p className="text-[13px] font-semibold text-slate-800">{item.studentName} · {item.branch}</p><p className="tiny mt-1">Submitted {dateLabel(item.submittedAt)}</p></div><div className="flex flex-wrap items-center gap-2"><Status value={item.status}/><button type="button" className="btn btn-muted !min-h-9 !py-2" onClick={() => setDetail(item)}>View details</button></div></div>)}</div> : <p className="mt-4 text-[13px] text-slate-500">No Dues application has been submitted.</p>}
+              </div>)}</div> : !errors.students && <Empty message="No students match this roll number."/>)}
             </>}
           </section>}
 
           {section === 'reports' && <section>
             <PanelHeader title="Official analytics reports" description="Download aggregate statistics for all 17 departments. Individual student records are excluded." />
-            <SectionError error={errors.reports} onRetry={() => setErrors((old) => ({ ...old, reports: '' }))} />
+            <SectionError error={errors.reports} onRetry={() => setErrors((old) => ({ ...old, reports: '' }))}/>
             <div className="card max-w-4xl overflow-hidden">
-              <div className="border-b border-slate-100 p-6 sm:p-8"><span className="grid h-11 w-11 place-items-center rounded-md bg-slate-100 text-slate-600"><FileDown size={22} /></span><h3 className="mt-4 text-[17px] font-bold text-slate-900">Department clearance analytics</h3><p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500">Official Usharama College of Engineering and Technology reports include department metrics, current status totals, approval rates, and available historical aggregates.</p></div>
+              <div className="border-b border-slate-100 p-6 sm:p-8"><span className="grid h-11 w-11 place-items-center rounded-md bg-slate-100 text-slate-600"><FileDown size={22}/></span><h3 className="mt-4 text-[17px] font-bold text-slate-900">Department clearance analytics</h3><p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500">Official Usharama College of Engineering and Technology reports include department metrics, current status totals, approval rates, and available historical aggregates.</p></div>
               <div className="grid gap-3 p-6 sm:grid-cols-3 sm:p-8">
                 {[
                   ['pdf', 'Download PDF', 'Print-ready report'],
                   ['xlsx', 'Download Excel', 'Spreadsheet analysis'],
                   ['csv', 'Download CSV', 'Numeric data export'],
-                ].map(([format, title, caption]) => <button type="button" key={format} disabled={busy || !validDates} onClick={() => exportReport(format)} className="group flex min-h-32 flex-col items-start gap-2 rounded-md border border-slate-200 bg-white p-4 text-left transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"><Download size={18} className="text-slate-500" /><span className="mt-2 text-[13px] font-semibold text-slate-800">{title}</span><span className="tiny">{caption}</span></button>)}
+                ].map(([format, title, caption]) => <button type="button" key={format} disabled={busy || !validDates} onClick={() => exportReport(format)} className="group flex min-h-32 flex-col items-start gap-2 rounded-md border border-slate-200 bg-white p-4 text-left transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"><Download size={18} className="text-slate-500"/><span className="mt-2 text-[13px] font-semibold text-slate-800">{title}</span><span className="tiny">{caption}</span></button>)}
               </div>
               {busy && <p className="px-8 pb-6 text-xs text-slate-500" role="status">Preparing the report…</p>}
             </div>
@@ -484,17 +483,17 @@ export default function Principal() {
 
           {section === 'history' && <section>
             <PanelHeader title="Approval history" description="Historical department and Principal decisions, including authorized reopen events." />
-            <SectionError error={errors.history} onRetry={reload} />
-            {loading.history && !history ? <Loading label="Loading approval history…" /> : history && <>
+            <SectionError error={errors.history} onRetry={reload}/>
+            {loading.history && !history ? <Loading label="Loading approval history…"/> : history && <>
               <div className="card table-wrap"><table><thead><tr>{['Decision / event', 'Department account', 'Date (IST)', 'Details', 'Application'].map((label) => <th key={label}>{label}</th>)}</tr></thead><tbody>{historyItems.map((item, index) => <tr key={`${item.applicationId}-${item.at}-${index}`}><td className="min-w-36 font-medium text-slate-800">{String(item.action || '').replaceAll('_', ' ')}</td><td>{item.account}</td><td className="whitespace-nowrap">{dateLabel(item.at)}</td><td className="min-w-40">{item.details || '—'}</td><td>#{item.applicationId}</td></tr>)}</tbody></table></div>
-              {!historyItems.length && <div className="mt-4"><Empty message="No approval history is available." /></div>}
-              <Pagination data={{ page, total: history.total, pages: Math.ceil((history.total || 0) / 10) }} onPage={setPage} />
+              {!historyItems.length && <div className="mt-4"><Empty message="No approval history is available."/></div>}
+              <Pagination data={{ page, total: history.total, pages: Math.ceil((history.total || 0) / 10) }} onPage={setPage}/>
             </>}
           </section>}
         </div>
       </main>
-      <StudentDetails item={detail} onClose={() => setDetail(null)} onDecide={beginDecision} busy={busy} onDownload={downloadFinalPdf} />
-      <DecisionModal decision={decision} remark={remarks} setRemark={setRemarks} busy={busy} onCancel={() => { if (!busy) { setDecision(null); setRemarks('') } }} onConfirm={confirmDecision} />
+      <StudentDetails item={detail} onClose={() => setDetail(null)} onDecide={beginDecision} busy={busy} onDownload={downloadFinalPdf}/>
+      <DecisionModal decision={decision} remark={remarks} setRemark={setRemarks} busy={busy} onCancel={() => { if (!busy) { setDecision(null); setRemarks('') } }} onConfirm={confirmDecision}/>
     </div>
   )
 }

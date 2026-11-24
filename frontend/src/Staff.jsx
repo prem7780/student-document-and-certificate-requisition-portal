@@ -309,6 +309,7 @@ export default function Staff({ person }) {
   const [processingIds, setProcessingIds] = useState([])
   const [processing, setProcessing] = useState(false)
   const [notice, setNotice] = useState('')
+  const [actionError, setActionError] = useState('')
   const [uncertain, setUncertain] = useState(false)
   const [highlightId, setHighlightId] = useState(null)
   const [processedRoll, setProcessedRoll] = useState('')
@@ -417,7 +418,7 @@ export default function Staff({ person }) {
     api(`/staff/requests/${applicationId}`).then((current) => {
       if (cancelled) return
       if (current.departmentStatus !== 'PENDING') {
-        setNotice('This application has already been processed and is no longer pending.')
+        setActionError('This application has already been processed and is no longer pending.')
         setProcessedRoll(current.rollNumber || '')
       }
     }).catch(() => {
@@ -448,7 +449,7 @@ export default function Staff({ person }) {
     if (section === 'history') await loadHistory()
     if (section === 'search') await loadSearch()
   }
-  const manualRefresh = () => { setSelected([]); if (!uncertain) setNotice(''); refreshCurrent() }
+  const manualRefresh = () => { setSelected([]); setActionError(''); if (!uncertain) setNotice(''); refreshCurrent() }
   const changeFilter = (key, value) => {
     setFilters((current) => ({ ...current, [key]: value }))
     setSelected([]); setPage(0)
@@ -461,11 +462,11 @@ export default function Staff({ person }) {
     setApprovalDialog({ item, approved }); setRemarks('')
   }
   const closeDecision = () => { if (!processing) { setApprovalDialog(null); setRemarks('') } }
-  const networkAmbiguity = (error) => error instanceof TypeError || /network|fetch|timeout/i.test(error.message || '')
+  const networkAmbiguity = (error) => error instanceof TypeError || /network|fetch|timeout|connect to the server/i.test(error.message || '')
   const submitDecision = async () => {
     if (!approvalDialog || processing || uncertain || (!approvalDialog.approved && !remarks.trim())) return
     const { item, approved } = approvalDialog
-    setProcessing(true); setProcessingIds([item.approvalId]); setNotice('')
+    setProcessing(true); setProcessingIds([item.approvalId]); setNotice(''); setActionError('')
     try {
       await api(`/staff/approvals/${item.approvalId}/${approved ? 'approve' : 'reject'}`, {
         method: 'PATCH', body: { remarks: remarks.trim() },
@@ -474,20 +475,20 @@ export default function Staff({ person }) {
       setNotice('Decision recorded successfully.')
       await refreshCurrent()
     } catch (error) {
-      setNotice(error.message)
+      setActionError(error.message)
       if (networkAmbiguity(error)) setUncertain(true)
     } finally { setProcessing(false); setProcessingIds([]) }
   }
   const submitBulk = async () => {
     if (!selected.length || selected.length > 10 || processing || uncertain) return
-    setProcessing(true); setProcessingIds([...selected]); setNotice('')
+    setProcessing(true); setProcessingIds([...selected]); setNotice(''); setActionError('')
     try {
       await api('/staff/bulk-approve', { method: 'POST', body: { ids: selected, remarks: remarks.trim() } })
       setNotice(`${selected.length} applications approved successfully.`)
       setSelected([]); setBulkDialog(false); setRemarks('')
       await refreshCurrent()
     } catch (error) {
-      setNotice(error.message)
+      setActionError(error.message)
       if (networkAmbiguity(error)) setUncertain(true)
     } finally { setProcessing(false); setProcessingIds([]) }
   }
@@ -500,7 +501,7 @@ export default function Staff({ person }) {
   const activeNav = NAV.find((item) => item.id === section) || NAV[0]
   const showOverviewPreview = (row) => navigate('pending', { highlight: row.id })
   const unresolvedResult = async () => {
-    setUncertain(false); setNotice(''); setProcessedRoll(''); setApprovalDialog(null); setBulkDialog(false)
+    setUncertain(false); setNotice(''); setActionError(''); setProcessedRoll(''); setApprovalDialog(null); setBulkDialog(false)
     setRemarks(''); setSelected([])
     await refreshCurrent()
     if (detailsId != null) await openDetails(detailsId)
@@ -512,11 +513,11 @@ export default function Staff({ person }) {
         <div className="mb-7 mt-1 flex items-start justify-between gap-2 px-3">
           <div>
             <div className="flex items-center gap-2 text-slate-800"><ShieldCheck size={18} strokeWidth={1.8} /><h2 className="text-[14px] font-semibold">Department portal</h2></div>
-            <p className="mt-2 pl-[26px] text-xs text-slate-500">{person?.code || 'Staff account'}</p>
+
           </div>
           <button type="button" className="btn btn-muted !min-h-9 !p-2 md:hidden" onClick={() => setMobileMenu(false)} aria-label="Close navigation"><X size={17} /></button>
         </div>
-        <div className="px-3 text-[10px] font-semibold uppercase tracking-[.14em] text-slate-400">Workspace</div>
+
         <nav className="mt-3" aria-label="Staff dashboard pages">
           {NAV.map(({ id, label, icon: Icon }) => (
             <button type="button" key={id} className={`staff-nav-item ${section === id ? 'staff-nav-active' : ''}`} aria-current={section === id ? 'page' : undefined} onClick={() => navigate(id)}>
@@ -536,14 +537,14 @@ export default function Staff({ person }) {
             <div className="flex items-center gap-3">
               <button type="button" className="btn btn-muted !min-h-10 !p-2 md:hidden" onClick={() => setMobileMenu(true)} aria-label="Open navigation"><Menu size={19} /></button>
               <div>
-                <div className="mb-2 flex items-center gap-2 text-[11px] font-medium text-slate-400"><span>Department workspace</span><ChevronRight size={12} /> <span>{activeNav.label}</span></div>
                 <h1 className="section-title">{activeNav.label}</h1>
-                <p className="mt-1 text-[13px] text-slate-500">{person?.name || 'Department'} <span className="px-1 text-slate-300">/</span> {person?.code || 'Staff'}</p>
+
               </div>
             </div>
             <button type="button" className={mutedButton} onClick={manualRefresh} disabled={processing} title="Refresh current page"><RefreshCw size={16} /> Refresh</button>
           </header>
 
+          <ErrorPanel error={actionError} />
           {notice && (
             <div role="status" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
               <p className="min-w-0 flex-1 break-words">{notice}</p>

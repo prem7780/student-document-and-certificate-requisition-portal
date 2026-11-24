@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { CircleAlert, FileCheck2, LogOut } from 'lucide-react'
+import { userMessage } from './api'
 
 /**
  * DCCMP shared frontend components.
@@ -37,24 +38,22 @@ function PortalNavigation({ compact = false }) {
 
 export function Brand({ dark = false }) {
   return (
-    <Link to="/" aria-label="DCCMP — Home" className="campus-brand no-underline">
-      <span className="campus-brand-mark" aria-hidden="true">UC</span>
+    <Link to="/" aria-label="Student Document Requisition and Certificate Portal — Home" className="campus-brand no-underline">
+      <span className="campus-brand-mark" aria-hidden="true">SD</span>
       <span className="min-w-0">
-        <span className="campus-brand-name">Usharama College of Engineering and Technology</span>
-        <span className="campus-brand-subtitle">Digital Campus Clearance Portal</span>
+        <span className="campus-brand-name">Student Document and Certificate Requisition Portal</span>
+
       </span>
     </Link>
   )
 }
 
-export function TopBar({ person, onLogout }) {
+export function TopBar({ person, onLogout, actions }) {
   return (
     <header className="campus-topbar relative z-20 bg-white">
       <div className="campus-topbar-inner mx-auto flex w-full max-w-[1600px] items-center gap-4 px-4 sm:px-6 lg:px-9">
         <Brand />
-        <div className="ml-auto hidden items-center gap-3 lg:flex">
-          <PortalNavigation />
-        </div>
+        <div className="ml-auto flex items-center gap-2">{actions}</div>
         {person && !person.role && (
           <span className="hidden truncate text-xs text-slate-500 xl:block">
             {person.name || person.rollNumber || 'Student'}
@@ -67,20 +66,32 @@ export function TopBar({ person, onLogout }) {
           </button>
         )}
       </div>
-      <div className="border-t border-slate-100 px-3 sm:px-6 lg:hidden">
-        <PortalNavigation compact />
-      </div>
+
     </header>
   )
 }
 
+/** One compact navigation rail for home and login; no extra top navigation row. */
+export function PublicFrame({ children }) {
+  return <main className="sd-public-frame">
+    <aside className="sd-public-rail" aria-label="Portal access">
+      <div className="sd-public-rail-title">PORTAL ACCESS</div>
+      <nav aria-label="Public portal pages">
+        {navItems.map(({ to, label, end }) => <NavLink key={to} to={to} end={end}
+          className={({ isActive }) => `sd-public-rail-link ${isActive ? 'active' : ''}`}>{label}</NavLink>)}
+      </nav>
+    </aside>
+    <div className="sd-public-workspace">{children}</div>
+  </main>
+}
+
 export function Page({ title, subtitle, children, action }) {
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 sm:py-9 lg:px-9">
-      <div className="mb-7 flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-6">
+    <main className="sd-page mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-7">
+      <div className="sd-page-header mb-5 flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-3">
         <div className="min-w-0 flex-1">
           <h1 className="section-title">{title}</h1>
-          {subtitle && <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{subtitle}</p>}
+          {subtitle && <p className="sd-page-subtitle mt-1 max-w-3xl text-sm text-slate-500">{subtitle}</p>}
         </div>
         {action && <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div>}
       </div>
@@ -143,9 +154,9 @@ export function BusyButton({ busy = false, disabled = false, children, className
 export function ErrorPanel({ error }) {
   if (!error) return null
   return (
-    <div role="alert" className="mb-5 flex items-start gap-3 rounded-md border border-rose-200 bg-rose-50/70 px-4 py-3.5 text-sm leading-6 text-rose-800">
+    <div role="alert" className="sd-error-box mb-4 flex items-start gap-2 rounded-sm border border-red-300 bg-red-50 px-3 py-2.5 text-sm text-red-900">
       <CircleAlert size={18} className="mt-0.5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
-      <span className="min-w-0 break-words">{error}</span>
+      <span className="min-w-0 break-words">{userMessage(error)}</span>
     </div>
   )
 }

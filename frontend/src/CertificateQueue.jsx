@@ -24,6 +24,7 @@ export default function CertificateQueue({ role }) {
   const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [validationError, setValidationError] = useState('')
 
   async function refresh() {
     setError(''); setLoading(true)
@@ -44,26 +45,31 @@ export default function CertificateQueue({ role }) {
   async function run(action) {
     setBusy(true); setError(''); setNotice('')
     try { await action(); setNotice('Request updated successfully.'); setChoice(null); setRemarks(''); setIdentity(false); await refresh() }
-    catch (err) { setError(err.message) } finally { setBusy(false) }
+    catch (err) { setError(err.message); setValidationError(err.message) } finally { setBusy(false) }
   }
   async function open(id) { setError(''); try { setDetail(await api(`${base}/${id}`)) } catch (err) { setError(err.message) } }
   async function confirm() {
     if (!choice) return
     const { item, action } = choice
-    if (['reject', 'cancel'].includes(action) && !remarks.trim()) return
-    if (action === 'collect' && !identity) return
+    if (['reject', 'cancel'].includes(action) && !remarks.trim()) {
+      setValidationError('A reason is required before this decision can be submitted.'); return
+    }
+    if (action === 'collect' && !identity) {
+      setValidationError('Student identity must be verified before recording collection.'); return
+    }
+    setValidationError('')
     const path = action === 'collect' ? `${base}/${item.id}/collect` : action === 'cancel' ? `${base}/${item.id}/cancel` : `${base}/${item.id}/${action}`
     await run(() => api(path, { method: action === 'collect' ? 'POST' : 'PATCH', body: action === 'collect' ? { identityVerified: identity, remarks } : { remarks } }))
   }
   const actButtons = item => {
-    if (role === 'staff' && item.status === 'PENDING_HOD') return <div className="campus-service-actions"><button className="btn btn-primary" onClick={() => setChoice({ item, action: 'approve' })}>Approve</button><button className="btn btn-muted" onClick={() => setChoice({ item, action: 'reject' })}>Reject</button></div>
-    if (role === 'principal' && item.status === 'PENDING_PRINCIPAL') return <div className="campus-service-actions"><button className="btn btn-primary" onClick={() => setChoice({ item, action: 'approve' })}>Approve</button><button className="btn btn-muted" onClick={() => setChoice({ item, action: 'reject' })}>Reject</button></div>
-    if (role === 'admin') return <div className="campus-service-actions">{item.status === 'APPROVED' && <button className="btn btn-primary" onClick={() => setChoice({ item, action: 'collect' })}>Record collection</button>}{!['COLLECTED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(item.status) && <button className="btn btn-muted" onClick={() => setChoice({ item, action: 'cancel' })}>Cancel</button>}</div>
+    if (role === 'staff' && item.status === 'PENDING_HOD') return <div className="campus-service-actions"><button className="btn btn-primary" onClick={() => { setValidationError(''); setChoice({ item, action: 'approve' }) }}>Approve</button><button className="btn btn-muted" onClick={() => { setValidationError(''); setChoice({ item, action: 'reject' }) }}>Reject</button></div>
+    if (role === 'principal' && item.status === 'PENDING_PRINCIPAL') return <div className="campus-service-actions"><button className="btn btn-primary" onClick={() => { setValidationError(''); setChoice({ item, action: 'approve' }) }}>Approve</button><button className="btn btn-muted" onClick={() => { setValidationError(''); setChoice({ item, action: 'reject' }) }}>Reject</button></div>
+    if (role === 'admin') return <div className="campus-service-actions">{item.status === 'APPROVED' && <button className="btn btn-primary" onClick={() => { setValidationError(''); setChoice({ item, action: 'collect' }) }}>Record collection</button>}{!['COLLECTED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(item.status) && <button className="btn btn-muted" onClick={() => { setValidationError(''); setChoice({ item, action: 'cancel' }) }}>Cancel</button>}</div>
     return null
   }
   return <section className="campus-service-section space-y-5" aria-label="Certificate Requests">
     <div className="card p-5 sm:p-6">
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3"><div><p className="campus-eyebrow mb-1">Certificate Services / {role === 'staff' ? 'HOD' : role === 'principal' ? 'Principal' : 'Administration'}</p><h2 className="campus-service-heading">Certificate Requests</h2><p className="tiny mt-1">Independent of the 17-department No Dues approval workflow</p></div><button className="btn btn-muted" onClick={refresh} disabled={busy || loading}><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div>
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3"><div><h2 className="campus-service-heading">Certificate Requests</h2></div><button className="btn btn-muted" onClick={refresh} disabled={busy || loading}><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div>
       <ErrorPanel error={error} />
       {notice && <div className="campus-service-note mb-4" role="status">{notice}</div>}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 mb-6">
@@ -84,11 +90,11 @@ export default function CertificateQueue({ role }) {
     </tbody></table>{!filtered.length && !loading && <Empty message="No matching certificate requests." />}{loading && <p className="tiny p-5">Loading certificate requests…</p>}</div>}
 
     <div className="grid gap-4 md:grid-cols-2">{[['Requests by certificate type', stats.byType], ['Requests by routing branch', stats.byBranch]].map(([label, values]) => <div className="card p-5" key={label}><h3 className="campus-service-subheading mb-3">{label}</h3>{Object.entries(values || {}).map(([key, value]) => <div key={key} className="campus-service-row flex justify-between gap-4 text-sm"><span className="text-slate-600">{TYPES[key] || key}</span><b className="tabular-nums">{value}</b></div>)}{!Object.keys(values || {}).length && <p className="tiny">No data available.</p>}</div>)}</div>
-    <p className="tiny">Average HOD processing: {Math.round(stats.avgHodMinutes || 0)} min · Average Principal processing: {Math.round(stats.avgPrincipalMinutes || 0)} min{role === 'admin' ? ` · Failed notifications: ${stats.failedNotifications || 0}` : ''}</p>
+
 
     {role === 'admin' && (tab === 'failed' || tab === 'all') && <div className="card p-5"><h3 className="campus-service-subheading mb-3">Failed email notifications</h3>{failed.length ? failed.map(item => <div key={item.id} className="campus-service-row flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-semibold">Request #{item.requestId} · {item.kind}</p><p className="tiny mt-1">{item.recipient} · {item.lastError}</p></div><button className="btn btn-muted" disabled={busy} onClick={() => run(() => api(`/admin/certificates/${item.requestId}/resend?kind=${encodeURIComponent(item.kind)}`, { method: 'POST' }))}>Resend notification</button></div>) : <p className="tiny">No failed notifications.</p>}</div>}
 
     {detail && <div className="campus-service-dialog" role="presentation"><div className="campus-service-dialog-inner" role="dialog" aria-modal="true" aria-label="Certificate history"><div className="flex items-start justify-between gap-3 mb-5"><div><h3 className="campus-service-heading">Request #{detail.id}</h3><p className="tiny mt-1">{detail.studentName} · {detail.rollNumber} · {TYPES[detail.certificateType]}</p></div><button type="button" className="btn btn-muted" onClick={() => setDetail(null)} aria-label="Close history"><X size={17} /></button></div><div className="rounded-md border border-slate-200 px-4">{(detail.history || []).map(event => <div className="campus-service-row" key={event.id}><p className="text-sm font-semibold">{event.action.replaceAll('_', ' ')}</p><p className="tiny mt-1">{date(event.occurredAt)} · {event.actorRole}</p>{event.remarks && <p className="text-sm text-slate-600 mt-1">{event.remarks}</p>}</div>)}</div></div></div>}
-    {choice && <div className="campus-service-dialog" role="presentation"><div className="campus-service-dialog-inner" role="dialog" aria-modal="true" aria-label={`Confirm ${choice.action}`}><div className="mb-4 flex items-start justify-between gap-3"><div><p className="campus-eyebrow mb-1">Certificate request #{choice.item.id}</p><h3 className="campus-service-heading">Confirm {choice.action}</h3><p className="tiny mt-1">{choice.item.studentName} · {TYPES[choice.item.certificateType]}</p></div><button type="button" className="btn btn-muted" disabled={busy} onClick={() => setChoice(null)}><X size={16} /></button></div>{choice.action === 'collect' && <label className="campus-service-note mb-4 flex items-start gap-3"><input type="checkbox" className="mt-1" checked={identity} onChange={e => setIdentity(e.target.checked)} /><span>I've physically verified the student and am handing over exactly one certificate.</span></label>}<label className="block"><span className="label">{['reject', 'cancel'].includes(choice.action) ? 'Reason (required)' : 'Remarks (optional)'}</span><textarea className="field" rows={4} value={remarks} onChange={e => setRemarks(e.target.value)} /></label><div className="mt-5 flex justify-end gap-2 border-t border-slate-100 pt-4"><button type="button" className="btn btn-muted" disabled={busy} onClick={() => setChoice(null)}>Back</button><button type="button" className={choice.action === 'reject' || choice.action === 'cancel' ? 'btn btn-danger' : 'btn btn-primary'} disabled={busy || (['reject', 'cancel'].includes(choice.action) && !remarks.trim()) || (choice.action === 'collect' && !identity)} onClick={confirm}>{busy ? 'Saving…' : 'Confirm decision'}</button></div></div></div>}
+    {choice && <div className="campus-service-dialog" role="presentation"><div className="campus-service-dialog-inner" role="dialog" aria-modal="true" aria-label={`Confirm ${choice.action}`}><div className="mb-4 flex items-start justify-between gap-3"><div><p className="campus-eyebrow mb-1">Certificate request #{choice.item.id}</p><h3 className="campus-service-heading">Confirm {choice.action}</h3><p className="tiny mt-1">{choice.item.studentName} · {TYPES[choice.item.certificateType]}</p></div><button type="button" className="btn btn-muted" disabled={busy} onClick={() => setChoice(null)}><X size={16} /></button></div>{choice.action === 'collect' && <label className="campus-service-note mb-4 flex items-start gap-3"><input type="checkbox" className="mt-1" checked={identity} onChange={e => { setIdentity(e.target.checked); setValidationError('') }} /><span>I've physically verified the student and am handing over exactly one certificate.</span></label>}<ErrorPanel error={validationError} /><label className="block"><span className="label">{['reject', 'cancel'].includes(choice.action) ? 'Reason (required)' : 'Remarks (optional)'}</span><textarea className="field" rows={4} value={remarks} aria-invalid={Boolean(validationError)} onChange={e => { setRemarks(e.target.value); setValidationError('') }} /></label><div className="mt-5 flex justify-end gap-2 border-t border-slate-100 pt-4"><button type="button" className="btn btn-muted" disabled={busy} onClick={() => setChoice(null)}>Back</button><button type="button" className={choice.action === 'reject' || choice.action === 'cancel' ? 'btn btn-danger' : 'btn btn-primary'} disabled={busy} onClick={confirm}>{busy ? 'Saving…' : 'Confirm decision'}</button></div></div></div>}
   </section>
 }

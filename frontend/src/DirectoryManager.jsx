@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { api } from './api'
+import { api, userMessage } from './api'
 import { Empty, ErrorPanel } from './components'
 import { Download, FileSpreadsheet, RefreshCw, Search, Upload } from 'lucide-react'
 
@@ -36,7 +36,9 @@ export default function DirectoryManager() {
   }
   async function upload(event) {
     event.preventDefault()
-    if (!file) return
+    if (!file) { setError('Choose a CSV or XLSX file before uploading.'); return }
+    if (!/\.(csv|xlsx)$/i.test(file.name)) { setError('Invalid file format. Only CSV or XLSX files are accepted.'); return }
+    if (file.size > 5 * 1024 * 1024) { setError('File exceeds the 5 MB upload limit.'); return }
     setBusy(true); setError(''); setSummary(null)
     try {
       // Multipart upload must not set a JSON Content-Type; browser supplies boundary.
@@ -46,7 +48,7 @@ export default function DirectoryManager() {
         method: 'POST', credentials: 'same-origin',
         headers: { 'X-XSRF-TOKEN': token, 'X-User-Activity': '1' }, body,
       })
-      if (!response.ok) { const details = await response.json().catch(() => ({})); throw new Error(details.detail || details.message || 'Student Directory import failed.') }
+      if (!response.ok) { const details = await response.json().catch(() => ({})); throw new Error(userMessage(details.detail || details.message || details.error || 'Student Directory import failed.')) }
       setSummary(await response.json())
       await load()
     } catch (err) { setError(err.message) }
@@ -55,11 +57,11 @@ export default function DirectoryManager() {
 
   return <section className="campus-service-section space-y-5" aria-label="Student Directory">
     <div className="card p-5 sm:p-6">
-      <header className="mb-5 flex flex-wrap items-start justify-between gap-3"><div><p className="campus-eyebrow mb-1">Administration / Student Directory</p><h2 className="campus-service-heading flex items-center gap-2"><FileSpreadsheet size={19} /> Import student details</h2><p className="tiny mt-2">CSV or XLSX (maximum 5 MB). Required: roll number, student name, branch and email. Batch / Year is optional.</p></div><button type="button" className="btn btn-muted" onClick={() => load()} disabled={loading}><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></header>
+      <header className="mb-5 flex flex-wrap items-start justify-between gap-3"><div><h2 className="campus-service-heading flex items-center gap-2"><FileSpreadsheet size={19} /> Import student details</h2><p className="sd-form-hint">CSV or XLSX, max 5 MB · Roll Number, Student Name, Branch, Email, Batch (optional)</p></div><button type="button" className="btn btn-muted" onClick={() => load()} disabled={loading}><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></header>
       <ErrorPanel error={error} />
-      <form onSubmit={upload} className="flex flex-wrap items-end gap-3">
-        <label className="min-w-0 flex-1 sm:max-w-sm"><span className="label">Select a CSV or Excel file</span><input type="file" className="field !py-2" accept=".csv,.xlsx" required onChange={e => setFile(e.target.files?.[0] || null)} /></label>
-        <button type="submit" className="btn btn-primary" disabled={busy || !file}><Upload size={15} />{busy ? 'Importing…' : 'Upload student data'}</button>
+      <form noValidate onSubmit={upload} className="flex flex-wrap items-end gap-3">
+        <label className="min-w-0 flex-1 sm:max-w-sm"><span className="label">Select a CSV or Excel file</span><input type="file" className="field !py-2" accept=".csv,.xlsx" onChange={e => setFile(e.target.files?.[0] || null)} /></label>
+        <button type="submit" className="btn btn-primary" disabled={busy}><Upload size={15} />{busy ? 'Importing…' : 'Upload student data'}</button>
         <button type="button" className="btn btn-muted" onClick={() => download('/admin/directory/template', 'student-directory-template.csv').catch(err => setError(err.message))}><Download size={15} /> CSV template</button>
       </form>
       {summary && <div className="campus-service-note mt-5" role="status">

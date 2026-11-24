@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { api, downloadPdf } from './api'
 import CertificateServices from './CertificateServices'
+import PublicAccessLayout from './PublicAccessLayout'
 import {
   BusyButton,
   Empty,
@@ -28,6 +29,7 @@ import {
   Field,
   Page,
   Progress,
+  PublicFrame,
   Status,
   TopBar,
 } from './components'
@@ -150,90 +152,67 @@ function StepCard({ number, title, subtitle, state, active }) {
 
 function StudentLogin({ roll, email, otp, step, busy, error, info, setOtp, onRollChange, onEmailChange, onSend, onVerify, onBack }) {
   return (
-    <>
-      <TopBar />
-      <main className="min-h-[calc(100vh-76px)] bg-[#f8f9fa]">
-        <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[1fr_0.94fr] lg:items-center lg:gap-20 lg:px-10 lg:py-24">
-          <section className="min-w-0 py-2" aria-labelledby="student-login-heading">
-            <Eyebrow>Student portal</Eyebrow>
-            <h1 id="student-login-heading" className="mt-6 max-w-xl text-[clamp(2rem,3.6vw,2.8rem)] font-bold leading-[1.12] tracking-[-0.055em] text-slate-900">
-              One clear path to <span className="text-slate-500">campus clearance.</span>
-            </h1>
-            <p className="mt-6 max-w-lg text-[15px] leading-8 text-slate-600">
-              Sign in with your registered email to manage final clearance or request
-              individual certificates. Certificate requests do not require No Dues.
+    <PublicAccessLayout page="student">
+      <div className="sdrc-login-stage">
+        <section className="sdrc-login-card" aria-labelledby="sdrc-student-login-title">
+          <div className="sdrc-login-stripe" aria-hidden="true" />
+          <div className="sdrc-login-body">
+            <h1 id="sdrc-student-login-title">{step === 'send' ? 'Student Login' : 'OTP Verification'}</h1>
+            <p className="sdrc-login-description">
+              {step === 'send'
+                ? 'Enter your roll number and registered email address.'
+                : 'Enter the six-digit verification code sent to your email.'}
             </p>
-            <div className="mt-9 max-w-lg divide-y divide-slate-100 rounded-md border border-slate-200 bg-white px-5 sm:px-6">
-              {[
-                { Icon: Mail, title: 'Secure OTP verification', detail: 'Sign in using your roll number and registered email.' },
-                { Icon: ClipboardCheck, title: 'Alumni & No Dues', detail: 'Complete the one-time final-clearance process.' },
-                { Icon: FileCheck2, title: 'Certificate Requests', detail: 'Apply for Study, Bonafide, LOR and other certificates independently.' },
-              ].map(({ Icon, title, detail }) => (
-                <div key={title} className="flex gap-3 py-4">
-                  <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-50 text-slate-600">
-                    <Icon size={17} strokeWidth={1.8} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <h2 className="text-[13px] font-semibold text-slate-800">{title}</h2>
-                    <p className="mt-1 text-xs leading-5 text-slate-500">{detail}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="mt-7 text-xs text-slate-500">
-              Looking for staff or Principal access?{' '}
-              <Link to="/employee" className="inline-flex items-center gap-1 font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950">
-                Employee portal <ArrowRight size={13} aria-hidden="true" />
-              </Link>
-            </p>
-          </section>
-
-          <section className="min-w-0" aria-label="Student identity verification">
-            <div className="card mx-auto w-full max-w-[480px] p-6 sm:p-8 lg:p-9">
-              <div className="mb-6 flex items-center justify-between gap-3">
-                <span className="grid h-12 w-12 place-items-center rounded-md border border-slate-200 bg-slate-50 text-slate-700">
-                  <LockKeyhole size={21} strokeWidth={1.7} aria-hidden="true" />
-                </span>
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600">Secure access</span>
-              </div>
-              <h2 className="text-[24px] font-bold tracking-[-0.04em] text-slate-900">
-                {step === 'send' ? 'Student sign in' : 'Verify your email'}
-              </h2>
-              <p className="mt-2 mb-7 text-sm leading-6 text-slate-500">
-                {step === 'send'
-                  ? 'Enter your student details to receive a one-time verification code.'
-                  : <>Enter the six-digit code sent to <strong className="break-all font-semibold text-slate-700">{email}</strong>.</>}
-              </p>
-              <ErrorPanel error={error} />
-              <Notice>{info}</Notice>
-              {step === 'send' ? (
-                <form className="space-y-5" onSubmit={onSend}>
-                  <Field label="Roll number" value={roll} onChange={(event) => onRollChange(event.target.value)} placeholder="23NG1A0501" autoComplete="username" required />
-                  <Field label="College email" type="email" value={email} onChange={(event) => onEmailChange(event.target.value)} placeholder="rollnumber@usharama.in" autoComplete="email" required />
-                  <BusyButton className="!mt-7 w-full !py-3" busy={busy} type="submit">
-                    Send verification code <ArrowRight size={16} aria-hidden="true" />
-                  </BusyButton>
-                </form>
-              ) : (
-                <form className="space-y-5" onSubmit={onVerify}>
-                  <Field label="Six-digit OTP" value={otp} maxLength={6} minLength={6} inputMode="numeric" pattern="[0-9]{6}" autoComplete="one-time-code" onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="000000" required />
-                  <BusyButton className="w-full !py-3" busy={busy} type="submit" disabled={otp.length !== 6}>
-                    Verify and continue <ArrowRight size={16} aria-hidden="true" />
-                  </BusyButton>
-                  <button type="button" className="text-sm font-semibold text-slate-600 underline decoration-slate-300 underline-offset-4 hover:text-slate-900" disabled={busy} onClick={onBack}>
-                    Change email or resend code
-                  </button>
-                </form>
-              )}
-              <div className="mt-8 flex items-start gap-2.5 border-t border-slate-100 pt-5">
-                <ShieldCheck size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-slate-400" />
-                <p className="text-xs leading-5 text-slate-500">No student password is needed. The email must correspond to your registered roll number.</p>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
-    </>
+            <ErrorPanel error={error} />
+            {info && <div role="status" className="sdrc-login-success">{info}</div>}
+            {step === 'send' ? (
+              <form noValidate className="sdrc-login-form" onSubmit={onSend}>
+                <Field
+                  label="Roll Number"
+                  value={roll}
+                  onChange={(event) => onRollChange(event.target.value)}
+                  placeholder="Enter roll number"
+                  autoComplete="username"
+                  aria-required="true"
+                />
+                <Field
+                  label="Registered Email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => onEmailChange(event.target.value)}
+                  placeholder="Enter registered email"
+                  autoComplete="email"
+                  aria-required="true"
+                />
+                <button type="submit" className="sdrc-button sdrc-button-primary sdrc-login-submit" disabled={busy} aria-busy={busy || undefined}>
+                  {busy ? 'Sending OTP…' : 'Send OTP'}
+                </button>
+              </form>
+            ) : (
+              <form noValidate className="sdrc-login-form" onSubmit={onVerify}>
+                <Field
+                  label="Six-digit OTP"
+                  value={otp}
+                  maxLength={6}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="Enter six-digit OTP"
+                  aria-required="true"
+                />
+                <button type="submit" className="sdrc-button sdrc-button-primary sdrc-login-submit" disabled={busy} aria-busy={busy || undefined}>
+                  {busy ? 'Verifying…' : 'Verify OTP'}
+                </button>
+                <button type="button" className="sdrc-login-link-button" disabled={busy} onClick={onBack}>
+                  Change email / Request new OTP
+                </button>
+              </form>
+            )}
+            <p className="sdrc-login-switch">HOD, Principal or Admin? <Link to="/employee">Staff Login</Link></p>
+          </div>
+        </section>
+      </div>
+    </PublicAccessLayout>
   )
 }
 
@@ -461,7 +440,7 @@ function ApplicationTracking({ current, busy, onDownload, onRefresh }) {
 
 export default function Student() {
   const [person, setPerson] = useState(null)
-  const [workspaceSection, setWorkspaceSection] = useState('clearance')
+  const [workspaceSection, setWorkspaceSection] = useState('overview')
   const [checkingSession, setCheckingSession] = useState(true)
   const [alumniDone, setAlumniDone] = useState(false)
   const [applications, setApplications] = useState([])
@@ -481,8 +460,8 @@ export default function Student() {
     setPerson(student)
     setAlumniDone(Boolean(student.alumniSubmitted))
     if (student.directoryMatched) {
-      setForm(f => ({ ...f, name: student.studentName || f.name, branch: student.officialBranch || f.branch }))
-      setNd(f => ({ ...f, studentName: student.studentName || f.studentName, branch: student.officialBranch || f.branch }))
+      setForm(f => ({...f, name: student.studentName || f.name, branch: student.officialBranch || f.branch}))
+      setNd(f => ({...f, studentName: student.studentName || f.studentName, branch: student.officialBranch || f.branch}))
     }
     try {
       const all = await api('/student/applications')
@@ -520,8 +499,8 @@ export default function Student() {
         setPerson(student)
         setAlumniDone(Boolean(student.alumniSubmitted))
         if (student.directoryMatched) {
-          setForm(f => ({ ...f, name: student.studentName || f.name, branch: student.officialBranch || f.branch }))
-          setNd(f => ({ ...f, studentName: student.studentName || f.studentName, branch: student.officialBranch || f.branch }))
+          setForm(f => ({...f, name: student.studentName || f.name, branch: student.officialBranch || f.branch}))
+          setNd(f => ({...f, studentName: student.studentName || f.studentName, branch: student.officialBranch || f.branch}))
         }
         try {
           const all = await api('/student/applications')
@@ -532,8 +511,7 @@ export default function Student() {
               const record = await api('/student/alumni')
               if (!mounted || !record?.registration) return
               const a = record.registration
-              setNd((previous) => ({
-                ...previous,
+              setNd((previous) => ({ ...previous,
                 studentName: previous.studentName || a.name || '',
                 branch: previous.branch || a.branch || '',
                 address: previous.address || a.address || '',
@@ -571,16 +549,20 @@ export default function Student() {
 
   function onSend(event) {
     event.preventDefault()
+    if (!roll.trim()) { setError('Roll number is required.'); return }
+    if (!/^\d{2}NG[15]A\d{4}$/.test(roll)) { setError('Enter a valid 10-character student roll number.'); return }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError('Enter a valid registered email address.'); return }
     run(async () => {
       await api('/public/otp/send', { method: 'POST', body: { rollNumber: roll, email } })
       setOtp('')
       setStep('verify')
-      setInfo('Verification code sent. Please check your college email.')
+      setInfo('Verification code sent. Check your registered email.')
     })
   }
 
   function onVerify(event) {
     event.preventDefault()
+    if (!/^\d{6}$/.test(otp)) { setError('Enter the complete six-digit OTP.'); return }
     run(async () => {
       await api('/public/otp/verify', { method: 'POST', body: { rollNumber: roll, otp } })
       setStep('send')
@@ -641,6 +623,7 @@ export default function Student() {
   const completed = current?.handoverStatus === 'HANDED_OVER'
   const showAlumni = !alumniDone
   const showNoDues = alumniDone && !current
+  const certificateSection = workspaceSection === 'apply' || workspaceSection === 'requests'
 
   if (checkingSession) return (
     <>
@@ -663,92 +646,69 @@ export default function Student() {
     />
   )
 
-  return (
-    <div className="campus-public-page min-h-screen">
-      <TopBar person={person} onLogout={logout} />
-      <Page
-        title="Student portal"
-        subtitle={`Verified as ${person.rollNumber} · ${person.email}`}
-        action={<span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700"><BadgeCheck size={15} aria-hidden="true" /> Email verified</span>}
-      >
-        <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
-          <Eyebrow>Choose a student service</Eyebrow>
-          <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900">
-            Home <ChevronRight size={14} aria-hidden="true" />
-          </Link>
-        </div>
-
-        <nav className="mb-8 grid gap-3 md:grid-cols-2" aria-label="Student services">
-          <button
-            type="button"
-            aria-pressed={workspaceSection === 'clearance'}
-            aria-controls="student-clearance-section"
-            onClick={() => setWorkspaceSection('clearance')}
-            className={`group flex min-h-[132px] w-full items-start gap-4 rounded-md border bg-white p-5 text-left shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#344e67] sm:p-6 ${workspaceSection === 'clearance' ? 'border-[#8fa5b7] bg-[#f6f8fa] ring-1 ring-[#d6e1ea]' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
-          >
-            <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-md border ${workspaceSection === 'clearance' ? 'border-[#d8e2eb] bg-[#e9f0f5] text-[#344e67]' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>
-              <ClipboardCheck size={20} strokeWidth={1.8} aria-hidden="true" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Final clearance · One time</span>
-              <span className="mt-1 block text-base font-bold text-slate-900">Alumni &amp; No Dues</span>
-              <span className="mt-1.5 block text-xs leading-5 text-slate-600">Registration, 17 department approvals, Principal clearance and original document collection.</span>
-            </span>
-            <ChevronRight size={17} className={`mt-1 shrink-0 ${workspaceSection === 'clearance' ? 'text-[#344e67]' : 'text-slate-400'}`} aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            aria-pressed={workspaceSection === 'certificates'}
-            aria-controls="student-certificate-section"
-            onClick={() => setWorkspaceSection('certificates')}
-            className={`group flex min-h-[132px] w-full items-start gap-4 rounded-md border bg-white p-5 text-left shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#344e67] sm:p-6 ${workspaceSection === 'certificates' ? 'border-[#8fa5b7] bg-[#f6f8fa] ring-1 ring-[#d6e1ea]' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
-          >
-            <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-md border ${workspaceSection === 'certificates' ? 'border-[#d8e2eb] bg-[#e9f0f5] text-[#344e67]' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>
-              <FileText size={20} strokeWidth={1.8} aria-hidden="true" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Individual certificates · Repeatable</span>
-              <span className="mt-1 block text-base font-bold text-slate-900">Certificate Requests</span>
-              <span className="mt-1.5 block text-xs leading-5 text-slate-600">Study, Bonafide, LOR, Duplicate TC and Conduct Certificates. No Dues is not required.</span>
-            </span>
-            <ChevronRight size={17} className={`mt-1 shrink-0 ${workspaceSection === 'certificates' ? 'text-[#344e67]' : 'text-slate-400'}`} aria-hidden="true" />
-          </button>
+  const studentMenu = [
+    ['overview', 'Overview', GraduationCap],
+    ['clearance', 'Alumni & No Dues', ClipboardCheck],
+    ['apply', 'Apply for Certificate', FileText],
+    ['requests', 'My Certificate Requests', FileCheck2],
+    ['profile', 'My Profile', ShieldCheck],
+  ]
+  const pageTitle = studentMenu.find(item=>item[0]===workspaceSection)?.[1] || 'Student Portal'
+  return <div className="sd-student-root campus-public-page min-h-screen">
+    <TopBar person={person} onLogout={logout} />
+    <div className="sd-student-layout">
+      <aside className="sd-student-sidebar" aria-label="Student navigation">
+        <h2>STUDENT PORTAL</h2>
+        <nav aria-label="Student pages">
+          {studentMenu.map(([id,label,Icon])=><button type="button" key={id} aria-current={workspaceSection===id?'page':undefined}
+            className={`sd-student-nav ${workspaceSection===id?'active':''}`}
+            onClick={()=>{setWorkspaceSection(id);setError('');setInfo('')}}>
+            <Icon size={16} aria-hidden="true"/>{label}
+          </button>)}
         </nav>
-
-        {workspaceSection === 'clearance' ? (
-          <section id="student-clearance-section" aria-label="Alumni Registration and No Dues">
-            <div className="mb-6 border-b border-slate-200 pb-5">
-              <Eyebrow>Alumni &amp; No Dues</Eyebrow>
-              <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-900">Final clearance and original documents</h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">A one-time process: Alumni Registration, No Dues, 17 department decisions and Principal approval.</p>
-            </div>
-            <ErrorPanel error={error} />
-            <Notice>{info}</Notice>
-            <div className="mb-7 grid gap-4 md:grid-cols-3" aria-label="No Dues clearance stages">
-              <StepCard number="01" title="Alumni Registration" subtitle={alumniDone ? 'Your registration is recorded.' : 'Complete this form first.'} state={alumniDone ? 'done' : 'active'} active={showAlumni} />
-              <StepCard number="02" title="No Dues Application" subtitle={current ? 'Submitted to departments.' : 'Available after Alumni Registration.'} state={current ? 'done' : alumniDone ? 'active' : 'upcoming'} active={showNoDues} />
-              <StepCard number="03" title="Original document collection" subtitle={completed ? 'Original documents collected.' : current ? 'Track clearance and final approval.' : 'After all required approvals.'} state={completed ? 'done' : current ? 'active' : 'upcoming'} active={Boolean(current && !completed)} />
-            </div>
-            {showAlumni && <AlumniRegistration form={form} setForm={setForm} busy={busy} onSubmit={submitAlumni} imported={Boolean(person.directoryMatched)} />}
-            {showNoDues && <NoDuesApplication form={nd} setForm={setNd} busy={busy} onSubmit={submitNoDues} imported={Boolean(person.directoryMatched)} />}
-            {current && (
-              <ApplicationTracking
-                current={current} busy={busy} onRefresh={refreshApplications}
-                onDownload={() => run(async () => downloadPdf(`/student/approved-form/${current.id}`, `DCCMP-No-Dues-${current.id}.pdf`))}
-              />
-            )}
+      </aside>
+      <main className="sd-student-content">
+        <header className="sd-workspace-header">
+          <h1 className="section-title">{pageTitle}</h1>
+          <span className="sd-student-id">{person.rollNumber}</span>
+        </header>
+        <ErrorPanel error={error}/>
+        <Notice>{info}</Notice>
+        {workspaceSection==='overview' && <div className="sd-overview-links">
+          <section className="card p-4">
+            <h2>Alumni & No Dues</h2>
+            <p>{current ? `Current status: ${String(current.status||'Pending').replaceAll('_',' ')}` : alumniDone ? 'Alumni registration complete. No Dues can be submitted.' : 'Alumni registration is not submitted.'}</p>
+            <button className="btn btn-primary" type="button" onClick={()=>setWorkspaceSection('clearance')}>Open No Dues</button>
           </section>
-        ) : (
-          <section id="student-certificate-section" aria-label="Individual certificate requests">
-            <CertificateServices person={person} />
+          <section className="card p-4">
+            <h2>Certificate Requests</h2>
+            <p>Apply for Study, Bonafide, LOR, Duplicate TC or Conduct Certificate.</p>
+            <button className="btn btn-primary" type="button" onClick={()=>setWorkspaceSection('apply')}>Apply for Certificate</button>
           </section>
-        )}
-
-        <footer className="mt-10 flex items-start gap-2.5 border-t border-slate-200 py-7 text-xs leading-5 text-slate-500">
-          <Info size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
-          <p>DCCMP · Usharama College of Engineering and Technology. For corrections or clearance issues, contact the relevant college department.</p>
-        </footer>
-      </Page>
+        </div>}
+        {workspaceSection==='clearance' && <section aria-label="Alumni & No Dues">
+          <div className="sd-step-row" aria-label="No Dues clearance stages">
+            <StepCard number="01" title="Alumni Registration" subtitle="One-time registration" state={alumniDone?'done':'active'} active={showAlumni}/>
+            <StepCard number="02" title="No Dues" subtitle="17 department approvals" state={current?'done':alumniDone?'active':'upcoming'} active={showNoDues}/>
+            <StepCard number="03" title="Original Collection" subtitle="Admin handover" state={completed?'done':current?'active':'upcoming'} active={Boolean(current&&!completed)}/>
+          </div>
+          {showAlumni && <AlumniRegistration form={form} setForm={setForm} busy={busy} onSubmit={submitAlumni} imported={Boolean(person.directoryMatched)}/>}
+          {showNoDues && <NoDuesApplication form={nd} setForm={setNd} busy={busy} onSubmit={submitNoDues} imported={Boolean(person.directoryMatched)}/>}
+          {current && <ApplicationTracking current={current} busy={busy} onRefresh={refreshApplications}
+            onDownload={()=>run(async()=>downloadPdf(`/student/approved-form/${current.id}`,`No-Dues-${current.id}.pdf`))}/>}
+        </section>}
+        {certificateSection && <CertificateServices person={person} requestedPage={workspaceSection==='requests'?'requests':'apply'} onPageChange={page=>setWorkspaceSection(page)}/>}
+        {workspaceSection==='profile' && <section className="card sd-profile-card p-5">
+          <h2 className="campus-service-subheading mb-4">Student Details</h2>
+          <div className="sd-profile-grid">
+            <div><span>Roll number</span><strong>{person.rollNumber || '—'}</strong></div>
+            <div><span>Student name</span><strong>{person.studentName || '—'}</strong></div>
+            <div><span>Email</span><strong>{person.email || '—'}</strong></div>
+            <div><span>Official branch</span><strong>{person.officialBranch || '—'}</strong></div>
+          </div>
+          <p className="tiny mt-4">Contact the Admin office to correct imported records.</p>
+        </section>}
+      </main>
     </div>
-  )
+  </div>
 }

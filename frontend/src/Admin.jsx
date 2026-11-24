@@ -199,7 +199,7 @@ export default function Admin() {
       const blob = data instanceof Blob ? data : new Blob([data], { type: exportTypes[format] })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
-      link.href = url; link.download = `DCCMP-Department-Analytics.${format}`
+      link.href = url; link.download = `Student-Portal-Department-Analytics.${format}`
       document.body.appendChild(link); link.click(); link.remove()
       window.setTimeout(() => URL.revokeObjectURL(url), 1000)
     }, `${format.toUpperCase()} report downloaded.`)
@@ -224,33 +224,16 @@ export default function Admin() {
   ]
   const currentNav = NAV.find((n) => n.id === tab)
 
-  return <main className="mx-auto w-full max-w-[1600px] px-4 py-7 sm:px-6 lg:px-9 lg:py-9">
-    <div className="mb-7 flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-6">
-      <div>
-        <p className="mb-1 text-[11px] font-semibold uppercase tracking-[.12em] text-slate-400">Employee Portal / Administration</p>
-        <h1 className="section-title">Administration centre</h1>
-        <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-500">Manage college clearance applications, department accounts, document issuance and certificate collection.</p>
-      </div>
-      <button type="button" className="btn btn-muted" onClick={() => refresh()} disabled={refreshing || busy}>
-        <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} /> Refresh data
-      </button>
-    </div>
-
-    {error && <ErrorPanel error={error} />}
-    {notice && <div role="status" className="mb-5 flex items-start justify-between gap-3 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4 text-sm text-emerald-800">
-      <span className="flex items-center gap-2"><CheckCircle2 size={17} />{notice}</span>
-      <button type="button" aria-label="Dismiss notification" onClick={() => setNotice('')}><X size={16} /></button>
-    </div>}
-
+  return <main className="sd-admin-workspace w-full px-4 py-5 sm:px-6 lg:px-7">
     <div className="mb-4 flex items-center justify-between gap-3 lg:hidden">
       <button type="button" className="btn btn-muted" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-controls="admin-menu">
         <Menu size={17} /> {currentNav?.label || 'Menu'}
       </button>
-      <span className="tiny">Admin workspace</span>
+
     </div>
 
-    <div className="grid min-w-0 gap-6 lg:grid-cols-[224px_minmax(0,1fr)] lg:gap-8">
-      <aside id="admin-menu" className={`${menuOpen ? 'block' : 'hidden'} self-start rounded-md border border-slate-200 bg-white p-3 lg:sticky lg:top-6 lg:block`} aria-label="Administration sections">
+    <div className="sd-admin-layout grid min-w-0 gap-4 lg:grid-cols-[203px_minmax(0,1fr)] lg:gap-0">
+      <aside id="admin-menu" className={`sd-admin-sidebar ${menuOpen ? 'block' : 'hidden'} self-start p-3 lg:sticky lg:top-0 lg:block`} aria-label="Administration sections">
         <div className="border-b border-slate-100 px-3 pb-4 pt-2">
           <p className="text-[11px] font-semibold uppercase tracking-[.1em] text-slate-400">Workspace</p>
           <p className="mt-1 text-sm font-semibold text-slate-800">Administration</p>
@@ -258,14 +241,25 @@ export default function Admin() {
         <nav className="mt-3 space-y-1" aria-label="Admin pages">
           {NAV.map(({ id, label, icon: Icon }) => <button key={id} type="button" onClick={() => go(id)}
             aria-current={tab === id ? 'page' : undefined}
-            className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left text-[13px] font-semibold transition-colors ${tab === id ? 'border border-slate-200 bg-slate-100 text-slate-900' : 'border border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+            className={`sd-admin-nav flex w-full items-center gap-2 rounded-sm px-3 py-2.5 text-left text-[12px] ${tab === id ? 'sd-admin-nav-active' : ''}`}>
             <Icon size={17} strokeWidth={1.8} /><span className="flex-1">{label}</span>{tab === id && <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />}
           </button>)}
         </nav>
-        <p className="mt-5 border-t border-slate-100 px-3 pt-4 text-[11px] leading-5 text-slate-400">Shared department accounts are permanent. Decisions remain attributed to department accounts.</p>
+
       </aside>
 
-      <div className="min-w-0 space-y-6">
+      <div className="sd-admin-content min-w-0 space-y-4">
+        <div className="sd-admin-page-header">
+          <h1 className="section-title">{currentNav?.label || 'Overview'}</h1>
+          <button type="button" className="btn btn-muted" onClick={() => refresh()} disabled={refreshing || busy}>
+            <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} /> Refresh
+          </button>
+        </div>
+        {error && <ErrorPanel error={error} />}
+        {notice && <div role="status" className="mb-3 flex items-start justify-between gap-2 rounded-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+          <span className="flex items-center gap-2"><CheckCircle2 size={15} />{notice}</span>
+          <button type="button" aria-label="Dismiss notification" onClick={() => setNotice('')}><X size={15} /></button>
+        </div>}
         {loading ? <Loading /> : <>
           {tab === 'overview' && <>
             <SectionTitle eyebrow="At a glance" title="College clearance overview" description="Current application statuses and certificate collection across the college." />
